@@ -1,0 +1,107 @@
+[
+  {
+    "id": "dev-1",
+    "group": "dev-layout-1",
+    "label": "income-statement",
+    "extraction": "native",
+    "text": "Income statement\nTax ready\nSalary and wages 74000\nTotal gross amount 74000\nTax withheld 14000"
+  },
+  {
+    "id": "dev-2",
+    "group": "dev-layout-2",
+    "label": "payment-summary",
+    "extraction": "native",
+    "text": "PAYG payment summary - individual non-business\nGross payments 5000\nTotal tax withheld 900"
+  },
+  {
+    "id": "dev-3",
+    "group": "dev-layout-3",
+    "label": "bank-statement",
+    "extraction": "native",
+    "text": "Bank statement\nTransaction account\nOpening balance 2500\nDeposits 1200\nClosing balance 3700"
+  },
+  {
+    "id": "dev-4",
+    "group": "dev-layout-4",
+    "label": "loan-statement",
+    "extraction": "native",
+    "text": "Home loan statement\nInterest charged 1400\nPrincipal balance 320000"
+  },
+  {
+    "id": "dev-5",
+    "group": "dev-layout-5",
+    "label": "dividend-statement",
+    "extraction": "native",
+    "text": "Dividend statement\nFranked amount 700\nFranking credit 300\nUnfranked amount 0"
+  },
+  {
+    "id": "dev-6",
+    "group": "dev-layout-6",
+    "label": "managed-fund-statement",
+    "extraction": "native",
+    "text": "AMMA statement\nAttribution managed investment trust\nAMIT cost base net amount\nCapital gains 900"
+  },
+  {
+    "id": "dev-7",
+    "group": "dev-layout-7",
+    "label": "share-trade-confirmation",
+    "extraction": "native",
+    "text": "Contract note\nBuy 100 units EXM\nBrokerage 9.50\nSettlement date 12/05/2026"
+  },
+  {
+    "id": "dev-8",
+    "group": "dev-layout-8",
+    "label": "rental-statement",
+    "extraction": "native",
+    "text": "Rental property annual statement\nGross rent 28000\nManagement fees 1800\nRepairs 400"
+  },
+  {
+    "id": "dev-9",
+    "group": "dev-layout-9",
+    "label": "depreciation-schedule",
+    "extraction": "native",
+    "text": "Tax depreciation schedule\nDivision 40 plant and equipment\nDivision 43 capital works\nDiminishing value"
+  },
+  {
+    "id": "dev-10",
+    "group": "dev-layout-10",
+    "label": "business-activity-statement",
+    "extraction": "native",
+    "text": "Business activity statement\nG1 Total sales 110000\n1A GST on sales 10000\n1B GST on purchases 6000"
+  },
+  {
+    "id": "dev-11",
+    "group": "dev-layout-11",
+    "label": "notice-of-assessment",
+    "extraction": "native",
+    "text": "Notice of assessment\nIncome tax\nTaxable income 70000\nAmount payable 320"
+  },
+  {
+    "id": "dev-12",
+    "group": "dev-layout-12",
+    "label": "tax-return",
+    "extraction": "native",
+    "text": "Individual tax return 2026\nIncome\nDeductions\nTaxable income or loss\nTaxpayer declaration"
+  },
+  {
+    "id": "dev-13",
+    "group": "dev-layout-13",
+    "label": "tax-invoice",
+    "extraction": "native",
+    "text": "Tax invoice\nInvoice number SYN-100\nDescription Consulting\nSubtotal 100\nGST 10\nTotal due 110"
+  },
+  {
+    "id": "dev-14",
+    "group": "dev-layout-14",
+    "label": "receipt",
+    "extraction": "native",
+    "text": "Receipt\nPayment received\nPaid by card\nTotal paid 45\nGST included 4.09"
+  },
+  {
+    "id": "dev-15",
+    "group": "dev-layout-15",
+    "label": "private-health-statement",
+    "extraction": "native",
+    "text": "Private health insurance statement\nBenefit code 30\nYour premiums eligible for Australian Government rebate\nRebate received"
+  }
+]
