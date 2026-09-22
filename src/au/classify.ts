@@ -95,10 +95,13 @@ export function classifyAuRules(page: AuPage): AuResult {
   }
   // ponytail: bounded text headings cover address blocks; layout-aware detection needs issuer evaluation.
   const heading = text.split('\n').filter(x => x.trim()).slice(0, 32).join('\n')
+  // Keep document headings bounded, but requests may occur after long correspondence blocks.
+  // Only abstain for an explicit request for a document; ordinary instructions in a
+  // document body (for example, remittance advice instructions) are not context.
   if (/^\s*(?:[#>*-]+\s*)?instructions\b/im.test(heading) ||
-      /\b(?:invoice|receipt|statement|assessment|tax return)\s+(?:request|enquiry|inquiry)\b/i.test(heading) ||
-      /\b(?:could|can|would) you (?:please )?(?:send|provide|supply)\b|\brequest(?:ing)? (?:a |an |the |your )?(?:copy|invoice|receipt|statement)\b/i.test(heading) ||
-      /\b(template|example only|dear accountant|please (?:provide|request|send)|ignore (?:all )?previous instructions|classify this document)\b/i.test(heading)) {
+      /\b(?:invoice|receipt|statement|assessment|tax return)\s+(?:request|enquiry|inquiry)\b/i.test(text) ||
+      /\b(?:could|can|would) you (?:please )?(?:send|provide|supply)\b|\brequest(?:ing)? (?:a |an |the |your )?(?:copy|invoice|receipt|statement)\b/i.test(text) ||
+      /\b(template|example only|dear accountant|ignore (?:all )?previous instructions|classify this document)\b/i.test(heading)) {
     return { ...r, reason: 'context_only_or_instructions' }
   }
   const matches = RULES.filter(rule => {

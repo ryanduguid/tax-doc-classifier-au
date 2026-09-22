@@ -56,6 +56,20 @@
     "extraction": "native"
   },
   {
+    "id": "reg-long-late-request",
+    "group": "reg-long-late-request",
+    "label": "unknown",
+    "text": "Correspondence\nTax invoice\nAccounts team\nPO Box 2\nSydney NSW 2000\nCustomer copy\nReference 1\nReference 2\nReference 3\nReference 4\nReference 5\nReference 6\nReference 7\nReference 8\nReference 9\nReference 10\nReference 11\nReference 12\nReference 13\nReference 14\nReference 15\nReference 16\nReference 17\nReference 18\nReference 19\nReference 20\nReference 21\nReference 22\nReference 23\nReference 24\nReference 25\nReference 26\nReference 27\nReference 28\nReference 29\nPlease provide a tax invoice\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-document-body-instruction",
+    "group": "reg-document-body-instruction",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nExample supplier\nInvoice number 123\nDate 1 January\nCustomer details\nLine item\nAmount 100\nPlease provide remittance advice\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
     "id": "reg-mixed-late-heading",
     "group": "reg-mixed-late-heading",
     "label": "ambiguous",
