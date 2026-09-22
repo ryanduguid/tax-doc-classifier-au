@@ -4,7 +4,7 @@
   "hashes": {
     "development": "cdb8cfa78d6df8d5a49c01d2d0d51272fe11c3bbf6b0843f3cb154e0e9f40fa9",
     "held-out": "96e115e6d3d3e63747b8a09cceaddfb4c6e500b9ca47a79e64786990ed094827",
-    "regression": "509881c94e39e3c52979676f679c1293cab9af4bfac4a9e96e99432118ee6155",
+    "regression": "656a3108d63d270f4ba59c66bcd64d768826b7d576286a5f7cf9c1ef322db550",
     "hardening": "13ae39bb09811d12d23fea7703e77a69e16deee2497ff069870074cfc2a853ef"
   },
   "modelEvaluated": false,
@@ -631,12 +631,12 @@
     },
     "regression": {
       "rules": {
-        "cases": 32,
-        "correct": 32,
+        "cases": 35,
+        "correct": 35,
         "accuracy": 1,
         "knownCases": 14,
         "suggestions": 14,
-        "suggestionCoverage": 0.4375,
+        "suggestionCoverage": 0.4,
         "suggestionPrecision": 1,
         "perCategory": {
           "income-statement": {
@@ -730,8 +730,8 @@
             "precision": null
           },
           "unknown": {
-            "cases": 14,
-            "correct": 14,
+            "cases": 17,
+            "correct": 17,
             "recall": 1,
             "precision": 1
           },
@@ -751,13 +751,13 @@
         "errors": []
       },
       "keywordBaseline": {
-        "cases": 32,
+        "cases": 35,
         "correct": 16,
-        "accuracy": 0.5,
+        "accuracy": 0.45714285714285713,
         "knownCases": 14,
-        "suggestions": 30,
-        "suggestionCoverage": 0.9375,
-        "suggestionPrecision": 0.4666666666666667,
+        "suggestions": 33,
+        "suggestionCoverage": 0.9428571428571428,
+        "suggestionPrecision": 0.42424242424242425,
         "perCategory": {
           "income-statement": {
             "cases": 0,
@@ -775,7 +775,7 @@
             "cases": 4,
             "correct": 4,
             "recall": 1,
-            "precision": 0.5714285714285714
+            "precision": 0.4
           },
           "loan-statement": {
             "cases": 0,
@@ -850,9 +850,9 @@
             "precision": null
           },
           "unknown": {
-            "cases": 14,
+            "cases": 17,
             "correct": 2,
-            "recall": 0.14285714285714285,
+            "recall": 0.11764705882352941,
             "precision": 1
           },
           "ambiguous": {
@@ -946,6 +946,21 @@
           },
           {
             "id": "reg-statement-request-subject",
+            "truth": "unknown",
+            "prediction": "bank-statement"
+          },
+          {
+            "id": "reg-reply-request",
+            "truth": "unknown",
+            "prediction": "bank-statement"
+          },
+          {
+            "id": "reg-forward-request",
+            "truth": "unknown",
+            "prediction": "bank-statement"
+          },
+          {
+            "id": "reg-subject-prefix-chain",
             "truth": "unknown",
             "prediction": "bank-statement"
           }

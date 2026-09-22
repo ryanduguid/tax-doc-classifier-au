@@ -2,7 +2,7 @@ import { expect, it } from 'vitest'
 import { AU_TYPES } from '../../src/au/catalogue.js'
 import { assertQualityGates } from './gates.js'
 
-const passing = () => Object.fromEntries(Object.entries({ development: 15, 'held-out': 42, regression: 32, hardening: 20 }).map(([name, cases]) =>
+const passing = () => Object.fromEntries(Object.entries({ development: 15, 'held-out': 42, regression: 35, hardening: 20 }).map(([name, cases]) =>
   [name, { rules: { cases, correct: cases, perCategory: Object.fromEntries(AU_TYPES.map(type => [type, { cases: 1 }])) } }]))
 it('accepts complete passing regression reports', () => expect(() => assertQualityGates(passing())).not.toThrow())
 it('rejects incorrect predictions independently of the saved result file', () => {

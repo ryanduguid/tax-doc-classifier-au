@@ -259,5 +259,26 @@
     "label": "unknown",
     "text": "Subject: Bank statement request\nOpening balance and closing balance are required",
     "extraction": "native"
+  },
+  {
+    "id": "reg-reply-request",
+    "group": "reg-reply-request",
+    "label": "unknown",
+    "text": "Re: Bank statement request\nOpening balance and closing balance are required",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-forward-request",
+    "group": "reg-forward-request",
+    "label": "unknown",
+    "text": "Fwd: Bank statement request\nOpening balance and closing balance are required",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-subject-prefix-chain",
+    "group": "reg-subject-prefix-chain",
+    "label": "unknown",
+    "text": "Subject: Re: FW: Bank statement request\nOpening balance and closing balance are required",
+    "extraction": "native"
   }
 ]

@@ -68,7 +68,7 @@ const DOCUMENT_NAMES = `(?:${RULES.map(rule => rule.heading.source).join('|')}|\
 const DOCUMENT_OBJECT = `(?:(?:a|an|the|your|my|our|this|that)\\s+)?(?:copy\\b|${DOCUMENT_NAMES})`
 const CONTEXT_ONLY = [
   new RegExp(String.raw`^\s*(?:[#>*-]+\s*)?instructions\s+(?:for|on)\s+(?:(?:completing|preparing|filling(?:\s+(?:in|out))?)\s+)?${DOCUMENT_OBJECT}`, 'im'),
-  new RegExp(String.raw`^\s*(?:[#>*-]+\s*)?(?:subject:\s*)?${DOCUMENT_NAMES}\s+(?:copy\s+)?(?:request|enquiry|inquiry)[ \t]*[.!?:]?[ \t]*$`, 'im'),
+  new RegExp(String.raw`^\s*(?:[#>*-]+\s*)?(?:(?:subject|re|fw|fwd):[ \t]*)*${DOCUMENT_NAMES}\s+(?:copy\s+)?(?:request|enquiry|inquiry)[ \t]*[.!?:]?[ \t]*$`, 'im'),
   new RegExp(String.raw`\b(?:(?:could|can|would) you (?:please )?|please )(?:send|provide|supply|request)\s+(?:(?:me|us)\s+(?:with\s+)?)?${DOCUMENT_OBJECT}`, 'i'),
   new RegExp(String.raw`\brequest(?:ing)?\s+(?:for\s+)?${DOCUMENT_OBJECT}`, 'i'),
   new RegExp(String.raw`${DOCUMENT_NAMES}\s+template\b|\btemplate\s+(?:for\s+)?${DOCUMENT_OBJECT}`, 'i'),
