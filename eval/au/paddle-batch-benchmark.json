@@ -1,0 +1,19 @@
+{
+  "schema": "au-paddle-batch-benchmark-1",
+  "fixture": "scan-sideways.pdf",
+  "documentsPerBatch": 2,
+  "scope": "Two copies of one synthetic page on this Windows machine; model downloads excluded; process startup included.",
+  "samples": [
+    {
+      "order": "separate-first",
+      "separateMs": 9770,
+      "batchMs": 7525
+    },
+    {
+      "order": "batch-first",
+      "separateMs": 9954,
+      "batchMs": 7538
+    }
+  ],
+  "realIssuerThroughputMeasured": false
+}

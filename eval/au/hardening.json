@@ -1,0 +1,142 @@
+[
+  {
+    "id": "hard-invoice-enquiry",
+    "group": "hard-invoice-enquiry",
+    "label": "unknown",
+    "text": "Email\nSubject: Tax invoice enquiry\nCould you send me a copy?\nThe GST and total are missing.",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-receipt-request",
+    "group": "hard-receipt-request",
+    "label": "unknown",
+    "text": "Receipt request\nInvoice remains unpaid",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-unpaid-not-proof",
+    "group": "hard-unpaid-not-proof",
+    "label": "unknown",
+    "text": "Receipt\nUnpaid balance 45",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-dividend-title-only",
+    "group": "hard-dividend-title-only",
+    "label": "unknown",
+    "text": "Dividend statement",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-rental-title-only",
+    "group": "hard-rental-title-only",
+    "label": "unknown",
+    "text": "Rental statement",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-amma-title-only",
+    "group": "hard-amma-title-only",
+    "label": "unknown",
+    "text": "Attribution managed investment trust member annual statement",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-repeated-dividend-title",
+    "group": "hard-repeated-dividend-title",
+    "label": "unknown",
+    "text": "Dividend advice\nDividend advice",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-paid-valid",
+    "group": "hard-paid-valid",
+    "label": "receipt",
+    "text": "Receipt\nPaid in full\nAmount 45",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-dividend-valid",
+    "group": "hard-dividend-valid",
+    "label": "dividend-statement",
+    "text": "Dividend statement\nFranking credit 17",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-rental-valid",
+    "group": "hard-rental-valid",
+    "label": "rental-statement",
+    "text": "Rental statement\nRent received 350",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-invoice-unpaid-valid",
+    "group": "hard-invoice-unpaid-valid",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nUnpaid\nGST 8\nTotal 88",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-payment-request-valid",
+    "group": "hard-payment-request-valid",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nPlease pay within 7 days\nGST 9\nTotal 99",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-invoice-request-send",
+    "group": "hard-invoice-request-send",
+    "label": "unknown",
+    "text": "Tax invoice\nWould you please provide a copy\nGST and total were not supplied",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-gst-before-balance",
+    "group": "hard-gst-before-balance",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nGST 6\nBalance 66",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-balance-before-gst",
+    "group": "hard-balance-before-gst",
+    "label": "unknown",
+    "text": "Tax invoice\nBalance 66\nGST 6",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-total-before-gst",
+    "group": "hard-total-before-gst",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nTotal 77\nGST 7",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-bas-order-valid",
+    "group": "hard-bas-order-valid",
+    "label": "business-activity-statement",
+    "text": "BAS\n1A 15\n1B 10",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-bas-order-reversed",
+    "group": "hard-bas-order-reversed",
+    "label": "unknown",
+    "text": "BAS\n1B 10\n1A 15\nG1 150",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-not-tax-invoice",
+    "group": "hard-not-tax-invoice",
+    "label": "unknown",
+    "text": "Invoice enquiry\nCan you send a tax invoice?\nTotal 88 GST 8",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-rental-prefix-not-support",
+    "group": "hard-rental-prefix-not-support",
+    "label": "unknown",
+    "text": "Rental statement\nRental statement copy",
+    "extraction": "native"
+  }
+]

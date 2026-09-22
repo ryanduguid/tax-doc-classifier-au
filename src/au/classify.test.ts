@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import type { Backend, ChoiceAnswer } from '../backend.js'
 import { AU_TYPES } from './catalogue.js'
 import { classifyAuPage, classifyAuRules, type AuPage } from './classify.js'
-import { validatePages } from './input.js'
+import { validatePages, retryAuDocumentsWithPaddle } from './input.js'
 
 const invoice: AuPage = { page: 1, text: 'Tax invoice\nGST 10\nTotal due 110', extraction: 'native' }
 function answer(choice = 'tax-invoice', confidence = 0.98): ChoiceAnswer {
@@ -15,6 +15,47 @@ function backend(a: unknown): Backend {
 const authorised = (b: Backend) => ({ backend: b, allowModelProcessing: true })
 
 describe('Australian review contract', () => {
+  it('keeps native batches unchanged without starting a runtime', async () => {
+    const pages = [invoice]
+    const result = await retryAuDocumentsWithPaddle([{ file: 'native.pdf', pages }], { python: 'missing-python', models: 'missing-models' })
+    expect(result[0]).toBe(pages)
+  })
+  it('bounds batch size and validates all page lists before starting OCR', async () => {
+    const options = { python: 'missing-python', models: 'missing-models' }
+    await expect(retryAuDocumentsWithPaddle([], options)).rejects.toThrow('1 and 50')
+    await expect(retryAuDocumentsWithPaddle(Array.from({ length: 51 }, () => ({ file: 'scan.pdf', pages: [invoice] })), options)).rejects.toThrow('1 and 50')
+    const pages: AuPage[] = Array.from({ length: 500 }, (_, i) => ({ ...invoice, page: i + 1, extraction: 'needs_ocr' }))
+    await expect(retryAuDocumentsWithPaddle([{ file: 'a.pdf', pages }, { file: 'b.pdf', pages: pages.slice(0, 1) }], options)).rejects.toThrow('500 pages')
+    await expect(retryAuDocumentsWithPaddle([{ file: 'a.pdf', pages: [invoice, invoice] }], options)).rejects.toThrow('unique')
+  })
+  it('uses reliable OCR evidence while retaining low-confidence warnings and blocking model calls', async () => {
+    const b = backend(answer())
+    const page: AuPage = { ...invoice, extraction: 'ocr', text: invoice.text + '\nFooter',
+      warnings: ['paddle_low_confidence_lines'], ocrLineConfidence: [0.99, 0.99, 0.99, 0.2] }
+    expect(await classifyAuPage(page, authorised(b))).toMatchObject({ documentType: 'tax-invoice',
+      warnings: ['paddle_low_confidence_lines'], requiresReview: true, calls: 0 })
+    expect(b.ask).not.toHaveBeenCalled()
+    expect(classifyAuRules({ ...page, ocrLineConfidence: undefined }).documentType).toBe('unreadable')
+    expect(classifyAuRules({ ...page, warnings: ['another_warning'] }).documentType).toBe('unreadable')
+  })
+  it('validates line confidence alignment and values', () => {
+    for (const ocrLineConfidence of [[0.9], [0.9, NaN, 0.9], [0.9, -1, 0.9], [0.9, 2, 0.9]]) {
+      expect(() => classifyAuRules({ ...invoice, extraction: 'ocr', ocrLineConfidence })).toThrow('Invalid page')
+    }
+  })
+  it('skips resolved pages only in uncertain mode', async () => {
+    const b = backend(answer())
+    expect(await classifyAuPage(invoice, { backend: b, modelPolicy: 'uncertain' })).toMatchObject({ calls: 0, documentType: 'tax-invoice' })
+    expect(b.ask).not.toHaveBeenCalled()
+    await classifyAuPage(invoice, { ...authorised(b), modelPolicy: 'compare' })
+    expect(b.ask).toHaveBeenCalledTimes(1)
+  })
+  it('requires authorisation and calls the model for unresolved pages in uncertain mode', async () => {
+    const b = backend(answer('unknown'))
+    const page = { ...invoice, text: 'Unlisted document' }
+    await expect(classifyAuPage(page, { backend: b, modelPolicy: 'uncertain' })).rejects.toThrow('authorisation')
+    expect(await classifyAuPage(page, { ...authorised(b), modelPolicy: 'uncertain' })).toMatchObject({ calls: 1, documentType: 'unknown' })
+  })
   it('recognises sparse evidence without treating it as blank or assigning invented confidence', () => {
     expect(classifyAuRules(invoice)).toMatchObject({ documentType: 'tax-invoice', confidence: null, requiresReview: true })
   })

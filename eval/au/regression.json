@@ -1,0 +1,137 @@
+[
+  {
+    "id": "reg-invoice-payment-instructions",
+    "group": "reg-invoice-payment-instructions",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nPayment instructions\nPay within 14 days\nGST 10.00\nTotal 110.00",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-invoice-request-payment",
+    "group": "reg-invoice-request-payment",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nPlease pay by the due date\nGST 25\nTotal 275",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-address-block",
+    "group": "reg-address-block",
+    "label": "bank-statement",
+    "text": "Example Bank\nStatements team\nPO Box 100\nSydney NSW 2000\nCustomer A\nUnit 2\n10 Example Street\nSydney NSW 2000\nBank statement\nOpening balance 100\nClosing balance 120",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-markdown-bank",
+    "group": "reg-markdown-bank",
+    "label": "bank-statement",
+    "text": "Example Bank\nCustomer copy\n# Bank statement\nOpening balance 150\nClosing balance 180",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-instruction-title",
+    "group": "reg-instruction-title",
+    "label": "unknown",
+    "text": "Instructions for completing a tax invoice\nGST and total due",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-template-title",
+    "group": "reg-template-title",
+    "label": "unknown",
+    "text": "Tax invoice template\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-request-title",
+    "group": "reg-request-title",
+    "label": "unknown",
+    "text": "Correspondence\nPlease send a bank statement\nInclude the opening balance and closing balance",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-late-request",
+    "group": "reg-late-request",
+    "label": "unknown",
+    "text": "Accounts team\nPO Box 2\nSydney\nCustomer copy\nReference 1\nDate 22 September\nEnclosure note\nFor your records\nPlease provide a tax invoice\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-mixed-late-heading",
+    "group": "reg-mixed-late-heading",
+    "label": "ambiguous",
+    "text": "Tax invoice\nExample supplier\nLine item A\nLine item B\nLine item C\nLine item D\nGST 20\nTotal 220\nPayment receipt\nPaid by card",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-sparse-bank",
+    "group": "reg-sparse-bank",
+    "label": "unknown",
+    "text": "Bank statement",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-all-low-ocr",
+    "group": "reg-all-low-ocr",
+    "label": "unreadable",
+    "text": "Tax invoice\nGST 10\nTotal 110",
+    "extraction": "ocr",
+    "ocrEngine": "paddleocr-3.7.0-pp-ocrv6-small",
+    "warnings": [
+      "paddle_low_confidence_lines"
+    ],
+    "ocrLineConfidence": [
+      0.3,
+      0.3,
+      0.3
+    ]
+  },
+  {
+    "id": "reg-footer-low-ocr",
+    "group": "reg-footer-low-ocr",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nGST 30\nTotal 330\nTiny footer",
+    "extraction": "ocr",
+    "ocrEngine": "paddleocr-3.7.0-pp-ocrv6-small",
+    "warnings": [
+      "paddle_low_confidence_lines"
+    ],
+    "ocrLineConfidence": [
+      0.99,
+      0.99,
+      0.99,
+      0.3
+    ]
+  },
+  {
+    "id": "reg-heading-low-ocr",
+    "group": "reg-heading-low-ocr",
+    "label": "unreadable",
+    "text": "Tax invoice\nGST 40\nTotal 440",
+    "extraction": "ocr",
+    "ocrEngine": "paddleocr-3.7.0-pp-ocrv6-small",
+    "warnings": [
+      "paddle_low_confidence_lines"
+    ],
+    "ocrLineConfidence": [
+      0.3,
+      0.99,
+      0.99
+    ]
+  },
+  {
+    "id": "reg-support-low-ocr",
+    "group": "reg-support-low-ocr",
+    "label": "unreadable",
+    "text": "Tax invoice\nGST 50\nTotal 550",
+    "extraction": "ocr",
+    "ocrEngine": "paddleocr-3.7.0-pp-ocrv6-small",
+    "warnings": [
+      "paddle_low_confidence_lines"
+    ],
+    "ocrLineConfidence": [
+      0.99,
+      0.3,
+      0.3
+    ]
+  }
+]

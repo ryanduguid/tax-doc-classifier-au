@@ -32,6 +32,7 @@
     "requirements-pdf.txt",
     "docs/upstream-readme.md",
     "scripts/extract-paddle.py",
+    "scripts/pdf_limits.py",
     "requirements-paddle.txt",
     "docs/ocr-setup.md",
     "docs/evaluation.md",
@@ -39,12 +40,14 @@
     "eval/au/results.json",
     "eval/au/README.md",
     "eval/au/ocr-probe.json",
-    "eval/au/paddle-probe.json"
+    "eval/au/paddle-probe.json",
+    "eval/au/paddle-batch-benchmark.json",
+    "eval/au/rule-performance.json"
   ],
   "scripts": {
     "prepare": "tsc -p tsconfig.json",
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.check.json",
     "test": "vitest run",
     "build-criteria": "tsx scripts/build-criteria.ts",
     "eval:download": "tsx eval/download.ts",
@@ -52,7 +55,8 @@
     "classify:au": "tsx src/au/cli.ts",
     "eval:au": "tsx eval/au/run.ts",
     "test:pdf": "tsx scripts/test-au-pdf.ts",
-    "probe:ocr": "tsx scripts/probe-au-ocr.ts"
+    "probe:ocr": "tsx scripts/probe-au-ocr.ts",
+    "benchmark:paddle": "tsx scripts/benchmark-au-paddle.ts"
   },
   "engines": {
     "node": ">=22.13"

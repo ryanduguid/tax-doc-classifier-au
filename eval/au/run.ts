@@ -1,9 +1,10 @@
 import { createHash } from 'node:crypto'
 import { readFile, writeFile } from 'node:fs/promises'
 import { AU_TYPES, classifyAuRules, type AuPage, type AuOutcome } from '../../src/au/index.js'
+import { assertQualityGates } from './gates.js'
 
 type Case = Omit<AuPage, 'page'> & { id: string; group: string; label: AuOutcome }
-const files = ['development', 'held-out'] as const
+const files = ['development', 'held-out', 'regression', 'hardening'] as const
 const datasets: Record<string, Case[]> = {}
 const hashes: Record<string, string> = {}
 const ids = new Set<string>(), groups = new Set<string>(), texts = new Set<string>()
@@ -54,3 +55,5 @@ for (const name of files) {
   console.log(`Errors: ${JSON.stringify(r.rules.errors)}`)
 }
 console.log('All suggestions require review. Automatic coverage 0%; field accuracy and time saved are unmeasured.')
+assertQualityGates(results)
+console.log('Quality gates PASS: complete category coverage and zero synthetic regression errors.')

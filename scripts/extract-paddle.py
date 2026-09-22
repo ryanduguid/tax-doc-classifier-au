@@ -1,13 +1,15 @@
 """Offline fallback for selected PDF pages after pdf-inspector fails to read them."""
 import contextlib
 import json
+import math
 import os
 from pathlib import Path
 import socket
 import sys
+from pdf_limits import check_file, check_geometry
 
 
-def extract(path, pages, model_root):
+def load_pipeline(model_root):
     os.environ["PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK"] = "True"
     os.environ["HF_HUB_OFFLINE"] = "1"
     os.environ["MODELSCOPE_OFFLINE"] = "1"
@@ -32,40 +34,82 @@ def extract(path, pages, model_root):
                 raise ValueError("Required offline model file is missing")
         options[key + "_model_name"] = name
         options[key + "_model_dir"] = str(directory.resolve())
-    import numpy as np
-    import pypdfium2 as pdfium
     from paddleocr import PaddleOCR
 
-    pipeline = PaddleOCR(**options, use_doc_orientation_classify=True, use_doc_unwarping=False,
-                         use_textline_orientation=True, device="cpu", enable_mkldnn=False)
+    return PaddleOCR(**options, use_doc_orientation_classify=True, use_doc_unwarping=False,
+                     use_textline_orientation=True, device="cpu", enable_mkldnn=False)
+
+
+def extract(path, pages, pipeline):
+    import numpy as np
+    import pypdfium2 as pdfium
+
     output = []
+    check_file(path)
     with pdfium.PdfDocument(path) as doc:
+        check_geometry(doc, pages, 2)
         for number in pages:
-            if number < 1 or number > len(doc):
-                raise ValueError("Invalid page number")
             page = doc[number - 1]
-            bitmap = page.render(scale=2)
-            # Paddle accepts a BGR image array; no temporary client image is written.
-            rgb = np.asarray(bitmap.to_pil().convert("RGB"))
-            results = list(pipeline.predict(rgb[:, :, ::-1].copy()))
-            bitmap.close()
-            page.close()
+            try:
+                bitmap = page.render(scale=2)
+                try:
+                    # Paddle accepts a BGR image array; no temporary client image is written.
+                    rgb = np.asarray(bitmap.to_pil().convert("RGB"))
+                    results = list(pipeline.predict(rgb[:, :, ::-1].copy()))
+                finally:
+                    bitmap.close()
+            finally:
+                page.close()
             if len(results) != 1:
                 raise ValueError("Unexpected OCR result count")
             data = results[0].json["res"]
             scores = data["rec_scores"]
-            text = "\n".join(data["rec_texts"])
-            warnings = [] if text.strip() and scores and min(scores) >= 0.8 else ["paddle_ocr_requires_review"]
+            texts = data["rec_texts"]
+            if len(scores) != len(texts) or any(not math.isfinite(s) or not 0 <= s <= 1 for s in scores):
+                raise ValueError("Invalid OCR confidence")
+            text = "\n".join(texts)
+            confidence = [float(score) for line, score in zip(texts, scores) for _ in line.split("\n")]
+            if not text.strip() or not scores:
+                warnings = ["paddle_ocr_requires_review"]
+                confidence = [0.0] * len(text.split("\n"))
+            else:
+                warnings = ["paddle_low_confidence_lines"] if min(scores) < 0.8 else []
             output.append({"page": number, "text": text, "extraction": "ocr", "warnings": warnings,
-                           "ocrEngine": "paddleocr-3.7.0-pp-ocrv6-small"})
+                           "ocrEngine": "paddleocr-3.7.0-pp-ocrv6-small", "ocrLineConfidence": confidence})
     return output
+
+
+def extract_batch(jobs, model_root):
+    if not isinstance(jobs, list) or not 1 <= len(jobs) <= 50:
+        raise ValueError("Invalid batch size")
+    total = 0
+    for job in jobs:
+        if not isinstance(job, dict) or not isinstance(job.get("file"), str) or not isinstance(job.get("pages"), list):
+            raise ValueError("Invalid batch request")
+        pages = job["pages"]
+        if not pages or any(type(n) is not int or n < 1 for n in pages) or pages != sorted(set(pages)):
+            raise ValueError("Invalid batch pages")
+        total += len(pages)
+    if total > 500:
+        raise ValueError("Invalid batch page count")
+    pipeline = load_pipeline(model_root)
+    result = []
+    for job in jobs:
+        try:
+            result.append(extract(job["file"], job["pages"], pipeline))
+        except Exception:
+            result.append(None)
+    return result
 
 
 if __name__ == "__main__":
     try:
         # Libraries may write setup messages to stdout. Keep the JSON channel clean.
         with contextlib.redirect_stdout(sys.stderr):
-            result = extract(sys.argv[1], [int(p) for p in sys.argv[2].split(",")], sys.argv[3])
+            if sys.argv[1] == "--batch":
+                result = extract_batch(json.load(sys.stdin), sys.argv[2])
+            else:
+                result = extract(sys.argv[1], [int(p) for p in sys.argv[2].split(",")], load_pipeline(sys.argv[3]))
         print(json.dumps(result, ensure_ascii=True))
     except Exception:
         print("Offline PaddleOCR failed. Check installed packages and local model files.", file=sys.stderr)

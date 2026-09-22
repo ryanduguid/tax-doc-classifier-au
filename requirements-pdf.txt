@@ -1,2 +1,4 @@
 # Optional local PDF extraction and offline OCR bridge.
 pdf-inspector==1.19.0
+# Page geometry preflight only; extraction remains with pdf-inspector.
+pypdfium2==5.13.0

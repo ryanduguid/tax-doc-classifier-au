@@ -1,0 +1,50 @@
+{
+  "schema": "au-rule-performance-1",
+  "input": "Tax invoice followed by repeated GST tokens without a total",
+  "scope": "Local synthetic probes on Windows. Before: one sample from the second assessment. After: seven samples from the updated classifier. Not a production latency benchmark.",
+  "measurements": [
+    {
+      "characters": 20012,
+      "beforeMs": 26,
+      "afterSamplesMs": [
+        1.94,
+        1.109,
+        0.832,
+        0.512,
+        0.64,
+        0.593,
+        0.514
+      ],
+      "afterMedianMs": 0.64
+    },
+    {
+      "characters": 40012,
+      "beforeMs": 99,
+      "afterSamplesMs": [
+        0.991,
+        1.059,
+        1.064,
+        1.149,
+        1.165,
+        1.184,
+        1.111
+      ],
+      "afterMedianMs": 1.111
+    },
+    {
+      "characters": 80012,
+      "beforeMs": 394,
+      "afterSamplesMs": [
+        2.142,
+        1.777,
+        1.795,
+        1.73,
+        1.792,
+        1.711,
+        1.767
+      ],
+      "afterMedianMs": 1.777
+    }
+  ],
+  "fieldThroughputMeasured": false
+}
