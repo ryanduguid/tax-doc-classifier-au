@@ -1,0 +1,284 @@
+[
+  {
+    "id": "reg-invoice-payment-instructions",
+    "group": "reg-invoice-payment-instructions",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nPayment instructions\nPay within 14 days\nGST 10.00\nTotal 110.00",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-invoice-request-payment",
+    "group": "reg-invoice-request-payment",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nPlease pay by the due date\nGST 25\nTotal 275",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-address-block",
+    "group": "reg-address-block",
+    "label": "bank-statement",
+    "text": "Example Bank\nStatements team\nPO Box 100\nSydney NSW 2000\nCustomer A\nUnit 2\n10 Example Street\nSydney NSW 2000\nBank statement\nOpening balance 100\nClosing balance 120",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-markdown-bank",
+    "group": "reg-markdown-bank",
+    "label": "bank-statement",
+    "text": "Example Bank\nCustomer copy\n# Bank statement\nOpening balance 150\nClosing balance 180",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-instruction-title",
+    "group": "reg-instruction-title",
+    "label": "unknown",
+    "text": "Instructions for completing a tax invoice\nGST and total due",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-template-title",
+    "group": "reg-template-title",
+    "label": "unknown",
+    "text": "Tax invoice template\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-request-title",
+    "group": "reg-request-title",
+    "label": "unknown",
+    "text": "Correspondence\nPlease send a bank statement\nInclude the opening balance and closing balance",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-late-request",
+    "group": "reg-late-request",
+    "label": "unknown",
+    "text": "Accounts team\nPO Box 2\nSydney\nCustomer copy\nReference 1\nDate 22 September\nEnclosure note\nFor your records\nPlease provide a tax invoice\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-mixed-late-heading",
+    "group": "reg-mixed-late-heading",
+    "label": "ambiguous",
+    "text": "Tax invoice\nExample supplier\nLine item A\nLine item B\nLine item C\nLine item D\nGST 20\nTotal 220\nPayment receipt\nPaid by card",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-sparse-bank",
+    "group": "reg-sparse-bank",
+    "label": "unknown",
+    "text": "Bank statement",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-all-low-ocr",
+    "group": "reg-all-low-ocr",
+    "label": "unreadable",
+    "text": "Tax invoice\nGST 10\nTotal 110",
+    "extraction": "ocr",
+    "ocrEngine": "paddleocr-3.7.0-pp-ocrv6-small",
+    "warnings": [
+      "paddle_low_confidence_lines"
+    ],
+    "ocrLineConfidence": [
+      0.3,
+      0.3,
+      0.3
+    ]
+  },
+  {
+    "id": "reg-footer-low-ocr",
+    "group": "reg-footer-low-ocr",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nGST 30\nTotal 330\nTiny footer",
+    "extraction": "ocr",
+    "ocrEngine": "paddleocr-3.7.0-pp-ocrv6-small",
+    "warnings": [
+      "paddle_low_confidence_lines"
+    ],
+    "ocrLineConfidence": [
+      0.99,
+      0.99,
+      0.99,
+      0.3
+    ]
+  },
+  {
+    "id": "reg-heading-low-ocr",
+    "group": "reg-heading-low-ocr",
+    "label": "unreadable",
+    "text": "Tax invoice\nGST 40\nTotal 440",
+    "extraction": "ocr",
+    "ocrEngine": "paddleocr-3.7.0-pp-ocrv6-small",
+    "warnings": [
+      "paddle_low_confidence_lines"
+    ],
+    "ocrLineConfidence": [
+      0.3,
+      0.99,
+      0.99
+    ]
+  },
+  {
+    "id": "reg-support-low-ocr",
+    "group": "reg-support-low-ocr",
+    "label": "unreadable",
+    "text": "Tax invoice\nGST 50\nTotal 550",
+    "extraction": "ocr",
+    "ocrEngine": "paddleocr-3.7.0-pp-ocrv6-small",
+    "warnings": [
+      "paddle_low_confidence_lines"
+    ],
+    "ocrLineConfidence": [
+      0.99,
+      0.3,
+      0.3
+    ]
+  },
+  {
+    "id": "reg-remittance-advice",
+    "group": "reg-remittance-advice",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nDetail 1\nDetail 2\nDetail 3\nDetail 4\nDetail 5\nDetail 6\nDetail 7\nDetail 8\nDetail 9\nDetail 10\nDetail 11\nDetail 12\nDetail 13\nDetail 14\nDetail 15\nDetail 16\nDetail 17\nDetail 18\nDetail 19\nDetail 20\nDetail 21\nDetail 22\nDetail 23\nDetail 24\nDetail 25\nDetail 26\nDetail 27\nDetail 28\nDetail 29\nDetail 30\nDetail 31\nDetail 32\nDetail 33\nPlease provide remittance advice\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-payment-details",
+    "group": "reg-payment-details",
+    "label": "bank-statement",
+    "text": "Bank statement\nDetail 1\nDetail 2\nDetail 3\nDetail 4\nDetail 5\nDetail 6\nDetail 7\nDetail 8\nDetail 9\nDetail 10\nDetail 11\nDetail 12\nDetail 13\nDetail 14\nDetail 15\nDetail 16\nDetail 17\nDetail 18\nDetail 19\nDetail 20\nDetail 21\nDetail 22\nDetail 23\nDetail 24\nDetail 25\nDetail 26\nDetail 27\nDetail 28\nDetail 29\nDetail 30\nDetail 31\nDetail 32\nDetail 33\nCould you please send your payment details\nOpening balance 100\nClosing balance 120",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-request-after-heading-window",
+    "group": "reg-request-after-heading-window",
+    "label": "unknown",
+    "text": "Tax invoice\nDetail 1\nDetail 2\nDetail 3\nDetail 4\nDetail 5\nDetail 6\nDetail 7\nDetail 8\nDetail 9\nDetail 10\nDetail 11\nDetail 12\nDetail 13\nDetail 14\nDetail 15\nDetail 16\nDetail 17\nDetail 18\nDetail 19\nDetail 20\nDetail 21\nDetail 22\nDetail 23\nDetail 24\nDetail 25\nDetail 26\nDetail 27\nDetail 28\nDetail 29\nDetail 30\nDetail 31\nDetail 32\nDetail 33\nPlease provide a tax invoice\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-copy-after-heading-window",
+    "group": "reg-copy-after-heading-window",
+    "label": "unknown",
+    "text": "Tax invoice\nDetail 1\nDetail 2\nDetail 3\nDetail 4\nDetail 5\nDetail 6\nDetail 7\nDetail 8\nDetail 9\nDetail 10\nDetail 11\nDetail 12\nDetail 13\nDetail 14\nDetail 15\nDetail 16\nDetail 17\nDetail 18\nDetail 19\nDetail 20\nDetail 21\nDetail 22\nDetail 23\nDetail 24\nDetail 25\nDetail 26\nDetail 27\nDetail 28\nDetail 29\nDetail 30\nDetail 31\nDetail 32\nDetail 33\nWould you please provide a copy\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-instructions-after-heading-window",
+    "group": "reg-instructions-after-heading-window",
+    "label": "unknown",
+    "text": "Tax invoice\nDetail 1\nDetail 2\nDetail 3\nDetail 4\nDetail 5\nDetail 6\nDetail 7\nDetail 8\nDetail 9\nDetail 10\nDetail 11\nDetail 12\nDetail 13\nDetail 14\nDetail 15\nDetail 16\nDetail 17\nDetail 18\nDetail 19\nDetail 20\nDetail 21\nDetail 22\nDetail 23\nDetail 24\nDetail 25\nDetail 26\nDetail 27\nDetail 28\nDetail 29\nDetail 30\nDetail 31\nDetail 32\nDetail 33\nInstructions for completing a tax invoice\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-early-remittance-advice",
+    "group": "reg-early-remittance-advice",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nPlease provide remittance advice\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-enquiry-contact-note",
+    "group": "reg-enquiry-contact-note",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nFor invoice enquiry call accounts\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-payment-instructions-heading",
+    "group": "reg-payment-instructions-heading",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nInstructions for payment\nPlease provide remittance advice\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-document-instruction-heading",
+    "group": "reg-document-instruction-heading",
+    "label": "unknown",
+    "text": "Instructions for preparing a tax invoice\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-completing-payment",
+    "group": "reg-completing-payment",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nInstructions for completing payment\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-request-for-invoice",
+    "group": "reg-request-for-invoice",
+    "label": "unknown",
+    "text": "Request for a tax invoice\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-invoice-copy-request",
+    "group": "reg-invoice-copy-request",
+    "label": "unknown",
+    "text": "Tax invoice copy request\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-payment-template-note",
+    "group": "reg-payment-template-note",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nUse the bank payment template for remittance\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-request-health-statement",
+    "group": "reg-request-health-statement",
+    "label": "unknown",
+    "text": "Please provide your private health insurance statement\nBenefit code 30\nTax claim code A",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-preparing-statement",
+    "group": "reg-preparing-statement",
+    "label": "unknown",
+    "text": "Instructions for preparing an annual tax statement\nManaged fund distributions\nCapital gains 100",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-statement-request-fee",
+    "group": "reg-statement-request-fee",
+    "label": "bank-statement",
+    "text": "Bank statement\nOpening balance 100\nStatement request fee 5.00\nClosing balance 95",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-enquiry-contact-heading",
+    "group": "reg-enquiry-contact-heading",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nTax invoice enquiry: call accounts\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-statement-request-subject",
+    "group": "reg-statement-request-subject",
+    "label": "unknown",
+    "text": "Subject: Bank statement request\nOpening balance and closing balance are required",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-reply-request",
+    "group": "reg-reply-request",
+    "label": "unknown",
+    "text": "Re: Bank statement request\nOpening balance and closing balance are required",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-forward-request",
+    "group": "reg-forward-request",
+    "label": "unknown",
+    "text": "Fwd: Bank statement request\nOpening balance and closing balance are required",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-subject-prefix-chain",
+    "group": "reg-subject-prefix-chain",
+    "label": "unknown",
+    "text": "Subject: Re: FW: Bank statement request\nOpening balance and closing balance are required",
+    "extraction": "native"
+  }
+]

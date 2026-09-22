@@ -2,7 +2,7 @@
 
 ## Default runtime
 
-The PDF bridge uses pdf-inspector 1.19.0. Native text needs only that Python package. Offline OCR also requires PDFium, ONNX Runtime and cached PP-OCRv6 Small models, as documented in [pdf-inspector's runtime guide](https://github.com/firecrawl/pdf-inspector/blob/main/docs/ocr-runtime.md).
+The PDF bridge uses pdf-inspector 1.19.0 for classification and extraction. Install requirements-pdf.txt in a dedicated environment, including pypdfium2 5.13.0 for the page-dimension check that pdf-inspector's API does not expose. Offline OCR also requires the configured PDFium library, ONNX Runtime and cached PP-OCRv6 Small models, as documented in [pdf-inspector's runtime guide](https://github.com/firecrawl/pdf-inspector/blob/main/docs/ocr-runtime.md).
 
 The tested runtime uses PDFium native-v7988, ONNX Runtime 1.27.0 and model revision oar-ocr-v0.7.0. Its Windows external OCR runtime is documented upstream as preview. The local synthetic integration check passed; that does not establish compatibility across Windows installations.
 
@@ -31,6 +31,12 @@ The production wrapper `scripts/extract-paddle.py` passes every model directory 
 
 ## Limits
 
-The comparison used one clean, one lightly skewed and one sideways synthetic invoice. It does not cover handwriting, severe blur, warped photographs, complex tables or all issuer layouts. Low OCR scores trigger review. The fallback has a 120-second process timeout; pages remain flagged if it cannot complete. No hosted fallback is implemented.
+The bridges check file size before processing and reject PDFs above 50 MiB or 500 pages. The default bridge gets the page count from pdf-inspector before extraction. Before OCR, geometry preflight checks all relevant pages against 20 million rendered pixels and 10,000 pixels per side, at 150 dpi for the default engine and scale 2 for Paddle. No oversized page is silently downscaled. Paddle validates every selected page before rendering any of them. These bounds do not replace process-level memory isolation.
+
+The comparison used one clean, one lightly skewed and one sideways synthetic invoice. It does not cover handwriting, severe blur, warped photographs, complex tables or all issuer layouts. Paddle lines below 0.8 confidence are excluded from classification evidence. Reliable remaining lines can support a suggestion, with the warning retained. Missing or malformed confidence data fails closed. Every suggestion still requires review; partially trusted OCR text is not sent to a model.
+
+The fallback has a 120-second process timeout, shared across a batch. Pages remain flagged if it cannot complete. The library batch API accepts up to 50 documents and 500 selected pages, reuses the loaded models, preserves document order and isolates individual extraction failures. A process failure flags every selected page. No hosted fallback is implemented.
 
 The probe's setup time includes model downloads. Inference timings are single local measurements, not comparable service benchmarks or production latency promises.
+
+Run `pnpm benchmark:paddle <pdf-inspector-python> <paddle-python> <model-directory>` with cached models to compare separate processes with batch reuse. It first confirms the sideways fixture needs fallback, then processes two copies in each mode with alternating run order. Results go to `eval/au/paddle-batch-benchmark.json`. This measures process and inference time on repeated synthetic input; real issuer throughput remains unmeasured.

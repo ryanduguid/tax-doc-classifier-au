@@ -3,7 +3,9 @@
   "corpus": "synthetic-development-holdout",
   "hashes": {
     "development": "cdb8cfa78d6df8d5a49c01d2d0d51272fe11c3bbf6b0843f3cb154e0e9f40fa9",
-    "held-out": "96e115e6d3d3e63747b8a09cceaddfb4c6e500b9ca47a79e64786990ed094827"
+    "held-out": "96e115e6d3d3e63747b8a09cceaddfb4c6e500b9ca47a79e64786990ed094827",
+    "regression": "656a3108d63d270f4ba59c66bcd64d768826b7d576286a5f7cf9c1ef322db550",
+    "hardening": "13ae39bb09811d12d23fea7703e77a69e16deee2497ff069870074cfc2a853ef"
   },
   "modelEvaluated": false,
   "reviewRate": 1,
@@ -623,6 +625,637 @@
             "id": "edge-8",
             "truth": "unknown",
             "prediction": "receipt"
+          }
+        ]
+      }
+    },
+    "regression": {
+      "rules": {
+        "cases": 35,
+        "correct": 35,
+        "accuracy": 1,
+        "knownCases": 14,
+        "suggestions": 14,
+        "suggestionCoverage": 0.4,
+        "suggestionPrecision": 1,
+        "perCategory": {
+          "income-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "payment-summary": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "bank-statement": {
+            "cases": 4,
+            "correct": 4,
+            "recall": 1,
+            "precision": 1
+          },
+          "loan-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "dividend-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "managed-fund-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "share-trade-confirmation": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "rental-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "depreciation-schedule": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "business-activity-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "notice-of-assessment": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "tax-return": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "tax-invoice": {
+            "cases": 10,
+            "correct": 10,
+            "recall": 1,
+            "precision": 1
+          },
+          "receipt": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "private-health-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "unknown": {
+            "cases": 17,
+            "correct": 17,
+            "recall": 1,
+            "precision": 1
+          },
+          "ambiguous": {
+            "cases": 1,
+            "correct": 1,
+            "recall": 1,
+            "precision": 1
+          },
+          "unreadable": {
+            "cases": 3,
+            "correct": 3,
+            "recall": 1,
+            "precision": 1
+          }
+        },
+        "errors": []
+      },
+      "keywordBaseline": {
+        "cases": 35,
+        "correct": 16,
+        "accuracy": 0.45714285714285713,
+        "knownCases": 14,
+        "suggestions": 33,
+        "suggestionCoverage": 0.9428571428571428,
+        "suggestionPrecision": 0.42424242424242425,
+        "perCategory": {
+          "income-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "payment-summary": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "bank-statement": {
+            "cases": 4,
+            "correct": 4,
+            "recall": 1,
+            "precision": 0.4
+          },
+          "loan-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "dividend-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "managed-fund-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "share-trade-confirmation": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "rental-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "depreciation-schedule": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "business-activity-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "notice-of-assessment": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "tax-return": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "tax-invoice": {
+            "cases": 10,
+            "correct": 10,
+            "recall": 1,
+            "precision": 0.43478260869565216
+          },
+          "receipt": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "private-health-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "unknown": {
+            "cases": 17,
+            "correct": 2,
+            "recall": 0.11764705882352941,
+            "precision": 1
+          },
+          "ambiguous": {
+            "cases": 1,
+            "correct": 0,
+            "recall": 0,
+            "precision": null
+          },
+          "unreadable": {
+            "cases": 3,
+            "correct": 0,
+            "recall": 0,
+            "precision": null
+          }
+        },
+        "errors": [
+          {
+            "id": "reg-instruction-title",
+            "truth": "unknown",
+            "prediction": "tax-invoice"
+          },
+          {
+            "id": "reg-template-title",
+            "truth": "unknown",
+            "prediction": "tax-invoice"
+          },
+          {
+            "id": "reg-request-title",
+            "truth": "unknown",
+            "prediction": "bank-statement"
+          },
+          {
+            "id": "reg-late-request",
+            "truth": "unknown",
+            "prediction": "tax-invoice"
+          },
+          {
+            "id": "reg-mixed-late-heading",
+            "truth": "ambiguous",
+            "prediction": "tax-invoice"
+          },
+          {
+            "id": "reg-sparse-bank",
+            "truth": "unknown",
+            "prediction": "bank-statement"
+          },
+          {
+            "id": "reg-all-low-ocr",
+            "truth": "unreadable",
+            "prediction": "tax-invoice"
+          },
+          {
+            "id": "reg-heading-low-ocr",
+            "truth": "unreadable",
+            "prediction": "tax-invoice"
+          },
+          {
+            "id": "reg-support-low-ocr",
+            "truth": "unreadable",
+            "prediction": "tax-invoice"
+          },
+          {
+            "id": "reg-request-after-heading-window",
+            "truth": "unknown",
+            "prediction": "tax-invoice"
+          },
+          {
+            "id": "reg-copy-after-heading-window",
+            "truth": "unknown",
+            "prediction": "tax-invoice"
+          },
+          {
+            "id": "reg-instructions-after-heading-window",
+            "truth": "unknown",
+            "prediction": "tax-invoice"
+          },
+          {
+            "id": "reg-document-instruction-heading",
+            "truth": "unknown",
+            "prediction": "tax-invoice"
+          },
+          {
+            "id": "reg-request-for-invoice",
+            "truth": "unknown",
+            "prediction": "tax-invoice"
+          },
+          {
+            "id": "reg-invoice-copy-request",
+            "truth": "unknown",
+            "prediction": "tax-invoice"
+          },
+          {
+            "id": "reg-statement-request-subject",
+            "truth": "unknown",
+            "prediction": "bank-statement"
+          },
+          {
+            "id": "reg-reply-request",
+            "truth": "unknown",
+            "prediction": "bank-statement"
+          },
+          {
+            "id": "reg-forward-request",
+            "truth": "unknown",
+            "prediction": "bank-statement"
+          },
+          {
+            "id": "reg-subject-prefix-chain",
+            "truth": "unknown",
+            "prediction": "bank-statement"
+          }
+        ]
+      }
+    },
+    "hardening": {
+      "rules": {
+        "cases": 20,
+        "correct": 20,
+        "accuracy": 1,
+        "knownCases": 8,
+        "suggestions": 8,
+        "suggestionCoverage": 0.4,
+        "suggestionPrecision": 1,
+        "perCategory": {
+          "income-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "payment-summary": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "bank-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "loan-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "dividend-statement": {
+            "cases": 1,
+            "correct": 1,
+            "recall": 1,
+            "precision": 1
+          },
+          "managed-fund-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "share-trade-confirmation": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "rental-statement": {
+            "cases": 1,
+            "correct": 1,
+            "recall": 1,
+            "precision": 1
+          },
+          "depreciation-schedule": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "business-activity-statement": {
+            "cases": 1,
+            "correct": 1,
+            "recall": 1,
+            "precision": 1
+          },
+          "notice-of-assessment": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "tax-return": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "tax-invoice": {
+            "cases": 4,
+            "correct": 4,
+            "recall": 1,
+            "precision": 1
+          },
+          "receipt": {
+            "cases": 1,
+            "correct": 1,
+            "recall": 1,
+            "precision": 1
+          },
+          "private-health-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "unknown": {
+            "cases": 12,
+            "correct": 12,
+            "recall": 1,
+            "precision": 1
+          },
+          "ambiguous": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "unreadable": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          }
+        },
+        "errors": []
+      },
+      "keywordBaseline": {
+        "cases": 20,
+        "correct": 10,
+        "accuracy": 0.5,
+        "knownCases": 8,
+        "suggestions": 16,
+        "suggestionCoverage": 0.8,
+        "suggestionPrecision": 0.4375,
+        "perCategory": {
+          "income-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "payment-summary": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "bank-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "loan-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "dividend-statement": {
+            "cases": 1,
+            "correct": 1,
+            "recall": 1,
+            "precision": 0.5
+          },
+          "managed-fund-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "share-trade-confirmation": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "rental-statement": {
+            "cases": 1,
+            "correct": 1,
+            "recall": 1,
+            "precision": 0.3333333333333333
+          },
+          "depreciation-schedule": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "business-activity-statement": {
+            "cases": 1,
+            "correct": 0,
+            "recall": 0,
+            "precision": null
+          },
+          "notice-of-assessment": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "tax-return": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "tax-invoice": {
+            "cases": 4,
+            "correct": 4,
+            "recall": 1,
+            "precision": 0.5
+          },
+          "receipt": {
+            "cases": 1,
+            "correct": 1,
+            "recall": 1,
+            "precision": 0.3333333333333333
+          },
+          "private-health-statement": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "unknown": {
+            "cases": 12,
+            "correct": 3,
+            "recall": 0.25,
+            "precision": 0.75
+          },
+          "ambiguous": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          },
+          "unreadable": {
+            "cases": 0,
+            "correct": 0,
+            "recall": null,
+            "precision": null
+          }
+        },
+        "errors": [
+          {
+            "id": "hard-invoice-enquiry",
+            "truth": "unknown",
+            "prediction": "tax-invoice"
+          },
+          {
+            "id": "hard-receipt-request",
+            "truth": "unknown",
+            "prediction": "receipt"
+          },
+          {
+            "id": "hard-unpaid-not-proof",
+            "truth": "unknown",
+            "prediction": "receipt"
+          },
+          {
+            "id": "hard-dividend-title-only",
+            "truth": "unknown",
+            "prediction": "dividend-statement"
+          },
+          {
+            "id": "hard-rental-title-only",
+            "truth": "unknown",
+            "prediction": "rental-statement"
+          },
+          {
+            "id": "hard-invoice-request-send",
+            "truth": "unknown",
+            "prediction": "tax-invoice"
+          },
+          {
+            "id": "hard-balance-before-gst",
+            "truth": "unknown",
+            "prediction": "tax-invoice"
+          },
+          {
+            "id": "hard-bas-order-valid",
+            "truth": "business-activity-statement",
+            "prediction": "unknown"
+          },
+          {
+            "id": "hard-not-tax-invoice",
+            "truth": "unknown",
+            "prediction": "tax-invoice"
+          },
+          {
+            "id": "hard-rental-prefix-not-support",
+            "truth": "unknown",
+            "prediction": "rental-statement"
           }
         ]
       }

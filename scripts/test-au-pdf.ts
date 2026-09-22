@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
-import { readAuPages, classifyAuRules, retryAuPagesWithPaddle } from '../src/au/index.js'
+import { readAuPages, classifyAuRules, retryAuPagesWithPaddle, retryAuDocumentsWithPaddle } from '../src/au/index.js'
 
 const python = process.argv[2] ?? 'python'
 const root = new URL('../eval/au/pdf/', import.meta.url)
@@ -47,10 +47,22 @@ if (process.argv[3] && process.argv[4]) {
   const noRetry = await retryAuPagesWithPaddle(path('native-pack.pdf'), native,
     { python: 'missing-python', models: 'missing-models' })
   assert.strictEqual(noRetry, native)
+  const batch = await retryAuDocumentsWithPaddle([
+    { file: path('native-pack.pdf'), pages: native },
+    { file: path('scan-sideways.pdf'), pages: sideways },
+    { file: path('missing.pdf'), pages: sideways },
+    { file: path('scan-sideways.pdf'), pages: sideways },
+  ], { python: process.argv[3], models: process.argv[4] })
+  assert.strictEqual(batch[0], native)
+  assert.equal(classifyAuRules(batch[1][0]).documentType, 'tax-invoice')
+  assert.equal(classifyAuRules(batch[2][0]).documentType, 'unreadable')
+  assert.ok(batch[2][0].warnings?.includes('paddle_fallback_failed'))
+  assert.equal(classifyAuRules(batch[3][0]).documentType, 'tax-invoice')
+  assert.equal(batch[1][0].ocrLineConfidence?.length, batch[1][0].text.split('\n').length)
   const { stdout: fallbackOutput } = await promisify(execFile)(process.execPath,
     [fileURLToPath(new URL('../dist/au/cli.js', import.meta.url)), path('scan-sideways.pdf'), '--python', python,
       '--ocr', '--paddle-python', process.argv[3], '--paddle-models', process.argv[4]])
   assert.equal(JSON.parse(fallbackOutput).results[0].documentType, 'tax-invoice')
   assert.ok(!fallbackOutput.includes('Example supplies'))
-  console.log('Paddle fallback PASS: sideways recovery, offline local models, missing-model refusal, native-page bypass and built CLI')
+  console.log('Paddle fallback PASS: sideways recovery, offline local models, missing-model refusal, native-page bypass, batch failure isolation and built CLI')
 }
