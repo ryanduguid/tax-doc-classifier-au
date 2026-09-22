@@ -175,5 +175,26 @@
     "label": "tax-invoice",
     "text": "Tax invoice\nPlease provide remittance advice\nGST 10\nTotal 110",
     "extraction": "native"
+  },
+  {
+    "id": "reg-enquiry-contact-note",
+    "group": "reg-enquiry-contact-note",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nFor invoice enquiry call accounts\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-payment-instructions-heading",
+    "group": "reg-payment-instructions-heading",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nInstructions for payment\nPlease provide remittance advice\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-document-instruction-heading",
+    "group": "reg-document-instruction-heading",
+    "label": "unknown",
+    "text": "Instructions for preparing a tax invoice\nGST 10\nTotal 110",
+    "extraction": "native"
   }
 ]
