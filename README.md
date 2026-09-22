@@ -100,7 +100,7 @@ The original US API remains at `tax-doc-classifier-au/us`, with upstream behavio
 
 Local rules score 15/15 development cases and 42/42 synthetic holdout cases. A category-name keyword baseline scores 11/15 and 20/42. The same author designed the rules and examples: these are development checks, not evidence of field accuracy.
 
-A separate 23-case regression set covers address blocks, payment instructions, late mixed headings and unreliable OCR lines. All 23 pass. Evaluation fails on any incorrect prediction, missing category in the original datasets or reduction below their minimum case counts. Updating the saved results does not bypass these gates. New cases are development regressions, not an independent holdout.
+A separate 29-case regression set covers address blocks, payment instructions, late mixed headings and unreliable OCR lines. All 29 pass. Evaluation fails on any incorrect prediction, missing category in the original datasets or reduction below their minimum case counts. Updating the saved results does not bypass these gates. New cases are development regressions, not an independent holdout.
 
 A further 20 hardening cases cover document requests, unpaid receipts, headings without supporting evidence and ordered tax labels. All 20 pass. Headings cannot supply their own supporting evidence; receipt matching distinguishes paid from unpaid. Invoice and BAS label checks scan tokens once, avoiding repeated rescanning on long incomplete input.
 

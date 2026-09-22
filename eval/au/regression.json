@@ -196,5 +196,47 @@
     "label": "unknown",
     "text": "Instructions for preparing a tax invoice\nGST 10\nTotal 110",
     "extraction": "native"
+  },
+  {
+    "id": "reg-completing-payment",
+    "group": "reg-completing-payment",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nInstructions for completing payment\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-request-for-invoice",
+    "group": "reg-request-for-invoice",
+    "label": "unknown",
+    "text": "Request for a tax invoice\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-invoice-copy-request",
+    "group": "reg-invoice-copy-request",
+    "label": "unknown",
+    "text": "Tax invoice copy request\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-payment-template-note",
+    "group": "reg-payment-template-note",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nUse the bank payment template for remittance\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-request-health-statement",
+    "group": "reg-request-health-statement",
+    "label": "unknown",
+    "text": "Please provide your private health insurance statement\nBenefit code 30\nTax claim code A",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-preparing-statement",
+    "group": "reg-preparing-statement",
+    "label": "unknown",
+    "text": "Instructions for preparing an annual tax statement\nManaged fund distributions\nCapital gains 100",
+    "extraction": "native"
   }
 ]

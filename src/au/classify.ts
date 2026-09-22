@@ -63,6 +63,18 @@ const RULES: Rule[] = [
   { type: 'private-health-statement', heading: /\b(?:private health insurance(?: tax)? statement|annual private health statement)\b/i, support: /rebate|benefit code|tax claim code/i },
 ]
 
+// Reuse recognised document names so context checks cover every supported category.
+const DOCUMENT_NAMES = `(?:${RULES.map(rule => rule.heading.source).join('|')}|\\b(?:document|form|invoice|statement|assessment|tax return)\\b)`
+const DOCUMENT_OBJECT = `(?:(?:a|an|the|your|my|our|this|that)\\s+)?(?:copy\\b|${DOCUMENT_NAMES})`
+const CONTEXT_ONLY = [
+  new RegExp(String.raw`^\s*(?:[#>*-]+\s*)?instructions\s+(?:for|on)\s+(?:(?:completing|preparing|filling(?:\s+(?:in|out))?)\s+)?${DOCUMENT_OBJECT}`, 'im'),
+  new RegExp(String.raw`^\s*(?:[#>*-]+\s*)?(?:subject:\s*)?${DOCUMENT_NAMES}\s+(?:copy\s+)?(?:request|enquiry|inquiry)\b`, 'im'),
+  new RegExp(String.raw`\b(?:(?:could|can|would) you (?:please )?|please )(?:send|provide|supply|request)\s+(?:(?:me|us)\s+(?:with\s+)?)?${DOCUMENT_OBJECT}`, 'i'),
+  new RegExp(String.raw`\brequest(?:ing)?\s+(?:for\s+)?${DOCUMENT_OBJECT}`, 'i'),
+  new RegExp(String.raw`${DOCUMENT_NAMES}\s+template\b|\btemplate\s+(?:for\s+)?${DOCUMENT_OBJECT}`, 'i'),
+  /\b(?:example only|dear accountant|ignore (?:all )?previous instructions|classify this document)\b/i,
+]
+
 export function validatePage(value: unknown): asserts value is AuPage {
   const p = value as AuPage | null
   if (!p || !Number.isSafeInteger(p.page) || p.page < 1 || typeof p.text !== 'string' ||
@@ -96,11 +108,7 @@ export function classifyAuRules(page: AuPage): AuResult {
   // ponytail: bounded text headings cover address blocks; layout-aware detection needs issuer evaluation.
   const heading = text.split('\n').filter(x => x.trim()).slice(0, 32).join('\n')
   // Check document requests throughout the reliable text, without rejecting payment instructions.
-  if (/^\s*(?:[#>*-]+\s*)?instructions(?:\s*$|\s+(?:for|on)\s+(?:completing|preparing|filling)\b)/im.test(text) ||
-      /^\s*(?:[#>*-]+\s*)?(?:subject:\s*)?(?:(?:tax|bank|loan|dividend|income|payment|annual|activity) )?(?:invoice|receipt|statement|assessment|tax return)\s+(?:request|enquiry|inquiry)\b/im.test(text) ||
-      /\b(?:(?:could|can|would) you (?:please )?|please )(?:send|provide|supply|request) (?:me |us )?(?:a |an |the |your )?(?:copy|(?:(?:tax|bank|loan|dividend|income|payment|annual|activity) )?(?:invoice|receipt|statement|assessment|tax return))\b/i.test(text) ||
-      /\brequest(?:ing)? (?:a |an |the |your )?(?:copy|invoice|receipt|statement)\b/i.test(text) ||
-      /\b(template|example only|dear accountant|ignore (?:all )?previous instructions|classify this document)\b/i.test(text)) {
+  if (CONTEXT_ONLY.some(pattern => pattern.test(text))) {
     return { ...r, reason: 'context_only_or_instructions' }
   }
   const matches = RULES.filter(rule => {
