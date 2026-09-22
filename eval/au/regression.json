@@ -133,5 +133,47 @@
       0.3,
       0.3
     ]
+  },
+  {
+    "id": "reg-remittance-advice",
+    "group": "reg-remittance-advice",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nDetail 1\nDetail 2\nDetail 3\nDetail 4\nDetail 5\nDetail 6\nDetail 7\nDetail 8\nDetail 9\nDetail 10\nDetail 11\nDetail 12\nDetail 13\nDetail 14\nDetail 15\nDetail 16\nDetail 17\nDetail 18\nDetail 19\nDetail 20\nDetail 21\nDetail 22\nDetail 23\nDetail 24\nDetail 25\nDetail 26\nDetail 27\nDetail 28\nDetail 29\nDetail 30\nDetail 31\nDetail 32\nDetail 33\nPlease provide remittance advice\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-payment-details",
+    "group": "reg-payment-details",
+    "label": "bank-statement",
+    "text": "Bank statement\nDetail 1\nDetail 2\nDetail 3\nDetail 4\nDetail 5\nDetail 6\nDetail 7\nDetail 8\nDetail 9\nDetail 10\nDetail 11\nDetail 12\nDetail 13\nDetail 14\nDetail 15\nDetail 16\nDetail 17\nDetail 18\nDetail 19\nDetail 20\nDetail 21\nDetail 22\nDetail 23\nDetail 24\nDetail 25\nDetail 26\nDetail 27\nDetail 28\nDetail 29\nDetail 30\nDetail 31\nDetail 32\nDetail 33\nCould you please send your payment details\nOpening balance 100\nClosing balance 120",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-request-after-heading-window",
+    "group": "reg-request-after-heading-window",
+    "label": "unknown",
+    "text": "Tax invoice\nDetail 1\nDetail 2\nDetail 3\nDetail 4\nDetail 5\nDetail 6\nDetail 7\nDetail 8\nDetail 9\nDetail 10\nDetail 11\nDetail 12\nDetail 13\nDetail 14\nDetail 15\nDetail 16\nDetail 17\nDetail 18\nDetail 19\nDetail 20\nDetail 21\nDetail 22\nDetail 23\nDetail 24\nDetail 25\nDetail 26\nDetail 27\nDetail 28\nDetail 29\nDetail 30\nDetail 31\nDetail 32\nDetail 33\nPlease provide a tax invoice\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-copy-after-heading-window",
+    "group": "reg-copy-after-heading-window",
+    "label": "unknown",
+    "text": "Tax invoice\nDetail 1\nDetail 2\nDetail 3\nDetail 4\nDetail 5\nDetail 6\nDetail 7\nDetail 8\nDetail 9\nDetail 10\nDetail 11\nDetail 12\nDetail 13\nDetail 14\nDetail 15\nDetail 16\nDetail 17\nDetail 18\nDetail 19\nDetail 20\nDetail 21\nDetail 22\nDetail 23\nDetail 24\nDetail 25\nDetail 26\nDetail 27\nDetail 28\nDetail 29\nDetail 30\nDetail 31\nDetail 32\nDetail 33\nWould you please provide a copy\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-instructions-after-heading-window",
+    "group": "reg-instructions-after-heading-window",
+    "label": "unknown",
+    "text": "Tax invoice\nDetail 1\nDetail 2\nDetail 3\nDetail 4\nDetail 5\nDetail 6\nDetail 7\nDetail 8\nDetail 9\nDetail 10\nDetail 11\nDetail 12\nDetail 13\nDetail 14\nDetail 15\nDetail 16\nDetail 17\nDetail 18\nDetail 19\nDetail 20\nDetail 21\nDetail 22\nDetail 23\nDetail 24\nDetail 25\nDetail 26\nDetail 27\nDetail 28\nDetail 29\nDetail 30\nDetail 31\nDetail 32\nDetail 33\nInstructions for completing a tax invoice\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-early-remittance-advice",
+    "group": "reg-early-remittance-advice",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nPlease provide remittance advice\nGST 10\nTotal 110",
+    "extraction": "native"
   }
 ]
