@@ -1,0 +1,7 @@
+[
+  {"page":1,"text":"Tax invoice\nSYNTHETIC EXAMPLE\nGST 10\nTotal due 110","extraction":"native"},
+  {"page":2,"text":"Bank statement\nSYNTHETIC EXAMPLE\nOpening balance 1000\nClosing balance 1200","extraction":"native"},
+  {"page":3,"text":"Internal correspondence\nPlease request a dividend statement.","extraction":"native"},
+  {"page":4,"text":"","extraction":"needs_ocr"},
+  {"page":5,"text":"Tax invoice\nGST 10\nTotal due 110\nPayment receipt\nPaid by card","extraction":"native"}
+]

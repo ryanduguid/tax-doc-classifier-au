@@ -1,0 +1,22 @@
+{
+  "engine": "PaddleOCR 3.7.0 / PaddlePaddle 3.3.0 / PP-OCRv6 Small",
+  "syntheticOnly": true,
+  "setupMs": 32249,
+  "inferenceMs": 2703,
+  "pages": [
+    {
+      "page": 1,
+      "text": "Tax invoice\nSYNTHETIC TEST DOCUMENT\nExample supplies\nGST 10.00\nTotal due 110.00",
+      "extraction": "ocr",
+      "warnings": [],
+      "angle": 270,
+      "scores": [
+        0.9996795654296875,
+        0.9800698757171631,
+        0.9999126195907593,
+        0.9960973262786865,
+        0.999509334564209
+      ]
+    }
+  ]
+}

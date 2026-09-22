@@ -4,3 +4,9 @@ eval/corpus
 eval/results
 .env
 .env.*
+
+# Modified for the Australian pilot: local evidence and generated previews.
+eval/au/pdf/*.png
+*.tgz
+__pycache__/
+.local/

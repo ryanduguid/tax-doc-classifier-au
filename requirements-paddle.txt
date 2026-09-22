@@ -1,0 +1,3 @@
+# Optional CPU fallback, separately installed from pdf-inspector.
+paddleocr==3.7.0
+paddlepaddle==3.3.0

@@ -1,0 +1,2 @@
+# Optional local PDF extraction and offline OCR bridge.
+pdf-inspector==1.19.0
