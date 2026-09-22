@@ -238,5 +238,26 @@
     "label": "unknown",
     "text": "Instructions for preparing an annual tax statement\nManaged fund distributions\nCapital gains 100",
     "extraction": "native"
+  },
+  {
+    "id": "reg-statement-request-fee",
+    "group": "reg-statement-request-fee",
+    "label": "bank-statement",
+    "text": "Bank statement\nOpening balance 100\nStatement request fee 5.00\nClosing balance 95",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-enquiry-contact-heading",
+    "group": "reg-enquiry-contact-heading",
+    "label": "tax-invoice",
+    "text": "Tax invoice\nTax invoice enquiry: call accounts\nGST 10\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "reg-statement-request-subject",
+    "group": "reg-statement-request-subject",
+    "label": "unknown",
+    "text": "Subject: Bank statement request\nOpening balance and closing balance are required",
+    "extraction": "native"
   }
 ]

@@ -4,7 +4,7 @@
   "hashes": {
     "development": "cdb8cfa78d6df8d5a49c01d2d0d51272fe11c3bbf6b0843f3cb154e0e9f40fa9",
     "held-out": "96e115e6d3d3e63747b8a09cceaddfb4c6e500b9ca47a79e64786990ed094827",
-    "regression": "b24a5065c5ccd694bf1296de343cdb4de4cc74190fa1e5b5949872d014af2596",
+    "regression": "509881c94e39e3c52979676f679c1293cab9af4bfac4a9e96e99432118ee6155",
     "hardening": "13ae39bb09811d12d23fea7703e77a69e16deee2497ff069870074cfc2a853ef"
   },
   "modelEvaluated": false,
@@ -631,12 +631,12 @@
     },
     "regression": {
       "rules": {
-        "cases": 29,
-        "correct": 29,
+        "cases": 32,
+        "correct": 32,
         "accuracy": 1,
-        "knownCases": 12,
-        "suggestions": 12,
-        "suggestionCoverage": 0.41379310344827586,
+        "knownCases": 14,
+        "suggestions": 14,
+        "suggestionCoverage": 0.4375,
         "suggestionPrecision": 1,
         "perCategory": {
           "income-statement": {
@@ -652,8 +652,8 @@
             "precision": null
           },
           "bank-statement": {
-            "cases": 3,
-            "correct": 3,
+            "cases": 4,
+            "correct": 4,
             "recall": 1,
             "precision": 1
           },
@@ -712,8 +712,8 @@
             "precision": null
           },
           "tax-invoice": {
-            "cases": 9,
-            "correct": 9,
+            "cases": 10,
+            "correct": 10,
             "recall": 1,
             "precision": 1
           },
@@ -730,8 +730,8 @@
             "precision": null
           },
           "unknown": {
-            "cases": 13,
-            "correct": 13,
+            "cases": 14,
+            "correct": 14,
             "recall": 1,
             "precision": 1
           },
@@ -751,13 +751,13 @@
         "errors": []
       },
       "keywordBaseline": {
-        "cases": 29,
-        "correct": 14,
-        "accuracy": 0.4827586206896552,
-        "knownCases": 12,
-        "suggestions": 27,
-        "suggestionCoverage": 0.9310344827586207,
-        "suggestionPrecision": 0.4444444444444444,
+        "cases": 32,
+        "correct": 16,
+        "accuracy": 0.5,
+        "knownCases": 14,
+        "suggestions": 30,
+        "suggestionCoverage": 0.9375,
+        "suggestionPrecision": 0.4666666666666667,
         "perCategory": {
           "income-statement": {
             "cases": 0,
@@ -772,10 +772,10 @@
             "precision": null
           },
           "bank-statement": {
-            "cases": 3,
-            "correct": 3,
+            "cases": 4,
+            "correct": 4,
             "recall": 1,
-            "precision": 0.6
+            "precision": 0.5714285714285714
           },
           "loan-statement": {
             "cases": 0,
@@ -832,10 +832,10 @@
             "precision": null
           },
           "tax-invoice": {
-            "cases": 9,
-            "correct": 9,
+            "cases": 10,
+            "correct": 10,
             "recall": 1,
-            "precision": 0.4090909090909091
+            "precision": 0.43478260869565216
           },
           "receipt": {
             "cases": 0,
@@ -850,9 +850,9 @@
             "precision": null
           },
           "unknown": {
-            "cases": 13,
+            "cases": 14,
             "correct": 2,
-            "recall": 0.15384615384615385,
+            "recall": 0.14285714285714285,
             "precision": 1
           },
           "ambiguous": {
@@ -943,6 +943,11 @@
             "id": "reg-invoice-copy-request",
             "truth": "unknown",
             "prediction": "tax-invoice"
+          },
+          {
+            "id": "reg-statement-request-subject",
+            "truth": "unknown",
+            "prediction": "bank-statement"
           }
         ]
       }

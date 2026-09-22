@@ -8,14 +8,14 @@ Measured locally on Windows on 22 September 2026. These are synthetic developmen
 |---|---:|---:|---:|
 | Development | 15 | 15 | 11 |
 | Held-out synthetic layouts and edge cases | 42 | 42 | 20 |
-| Optimisation regression cases | 29 | 29 | 14 |
+| Optimisation regression cases | 32 | 32 | 16 |
 | False-positive and ordering hardening | 20 | 20 | 10 |
 
 The corpus was committed at `6e57d85` before the Australian classifier. The held-out set has 2 examples for each of 15 categories, plus 12 edge cases covering unknown content, ambiguous documents, unreadable input, instructions and foreign forms. The [results file](../eval/au/results.json) records corpus hashes, per-category precision/recall and errors. No held-out case was changed after the first evaluation.
 
 The same author wrote the cases and the implementation. This is a development holdout, not a blind external benchmark. It deliberately uses compact text examples. Do not use these scores to claim real-world accuracy or transfer the original project's US results to Australia.
 
-The separate optimisation set was added after reproducing layout failures. Its 29 cases test payment instructions, longer address blocks, misleading requests, late conflicting headings and line-level OCR quality. PR review added positive controls for remittance, payment details and enquiry contact notes, plus requests and instructions beyond line 32. Context checks reuse the supported document names, including noun-first requests and copy requests. It was used during implementation and is not held out. The original 57 fixtures remain unchanged. Evaluation now fails if any case is incorrect, an original dataset loses a category, or a dataset drops below its minimum size. Tests verify that a lower score fails independently of the saved report.
+The separate optimisation set was added after reproducing layout failures. Its 32 cases test payment instructions, longer address blocks, misleading requests, late conflicting headings and line-level OCR quality. PR review added positive controls for remittance, payment details and enquiry contact notes and statement request fees, plus requests and instructions beyond line 32. Context checks reuse the supported document names, including noun-first requests and copy requests. It was used during implementation and is not held out. The original 57 fixtures remain unchanged. Evaluation now fails if any case is incorrect, an original dataset loses a category, or a dataset drops below its minimum size. Tests verify that a lower score fails independently of the saved report.
 
 The keyword baseline chooses the first category whose name appears anywhere in the text. The rules require a heading and supporting evidence, detect conflicting categories, and abstain on recognised instructional content. Neither method performs financial extraction.
 
