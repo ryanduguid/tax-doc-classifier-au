@@ -6,3 +6,5 @@ export { readAuPages, validatePages, retryAuPagesWithPaddle, retryAuDocumentsWit
 export type { ReadOptions } from './input.js'
 export { jevBackend, layaBackend, localLayaUrl, LAYA_MODELS, LAYA_CONTEXT, LAYA_DEFAULT_URL } from '../backend.js'
 export type { Backend, AskResult, ChoiceAnswer, ChoiceQuestion, Criterion, JevOptions, LayaOptions, LayaModel } from '../backend.js'
+export { decisionTemplate, summariseReview, validateDecisions, validateManifest } from './review.js'
+export type { ReviewDecision, ReviewDecisions, ReviewManifest } from './review.js'
