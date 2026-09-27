@@ -15,7 +15,8 @@ export type JevOptions = {
   retries?: number
 }
 
-export const LAYA_MODELS = ['multilingual', 'english', 'typed-decisions'] as const
+// typed-decisions first: fewest confident errors on unresolved pages in the synthetic evaluation.
+export const LAYA_MODELS = ['typed-decisions', 'multilingual', 'english'] as const
 export type LayaModel = (typeof LAYA_MODELS)[number]
 /** A self-hosted `laya-serve` process. It speaks the same `/v1/systemone` protocol as Jev. */
 export type LayaOptions = Omit<JevOptions, 'model'> & { model?: LayaModel }
@@ -87,7 +88,7 @@ function layaAnswer(answer: unknown): unknown {
 
 /** Requires a running `laya-serve`; the key is only needed when the server sets LAYA_API_KEY. */
 export function layaBackend(opts: LayaOptions = {}): Backend {
-  const model = opts.model ?? 'multilingual'
+  const model = opts.model ?? LAYA_MODELS[0]
   if (!LAYA_MODELS.includes(model)) throw new Error(`Unknown Laya checkpoint: use one of ${LAYA_MODELS.join(', ')}`)
   return systemOneBackend({ name: 'Laya', url: opts.baseUrl ?? LAYA_DEFAULT_URL, apiKey: opts.apiKey ?? process.env.LAYA_API_KEY, model,
     timeoutMs: opts.timeoutMs ?? 90_000, retries: opts.retries ?? 4, criteria: layaCriteria, answer: layaAnswer })

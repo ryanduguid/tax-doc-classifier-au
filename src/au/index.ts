@@ -5,4 +5,4 @@ export type { AuPage, AuResult, AuOutcome, AuOptions, Extraction } from './class
 export { readAuPages, validatePages, retryAuPagesWithPaddle, retryAuDocumentsWithPaddle } from './input.js'
 export type { ReadOptions } from './input.js'
 export { jevBackend, layaBackend, LAYA_MODELS, LAYA_DEFAULT_URL } from '../backend.js'
-export type { Backend, JevOptions, LayaOptions, LayaModel } from '../backend.js'
+export type { Backend, AskResult, ChoiceAnswer, ChoiceQuestion, Criterion, JevOptions, LayaOptions, LayaModel } from '../backend.js'

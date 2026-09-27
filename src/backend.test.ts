@@ -20,7 +20,7 @@ describe('Laya backend', () => {
     const [url, init] = fetchMock.mock.calls[0]
     expect(url).toBe('http://127.0.0.1:8000/v1/systemone')
     expect(init.headers).toEqual({ 'Content-Type': 'application/json' })
-    expect(JSON.parse(init.body)).toEqual({ model: 'multilingual', state: { page: 1, text: 'Tax invoice' },
+    expect(JSON.parse(init.body)).toEqual({ model: 'typed-decisions', state: { page: 1, text: 'Tax invoice' },
       questions: { document: { type: 'choice', instructions: 'Classify.', criteria: { 'tax-invoice': 'Tax invoice.', unknown: 'Anything else.' } } } })
   })
   it('sends a bearer token and a chosen checkpoint when supplied', async () => {

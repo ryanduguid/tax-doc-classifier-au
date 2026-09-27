@@ -13,7 +13,7 @@ function layaUrl(value = LAYA_DEFAULT_URL): string {
   return url.origin
 }
 
-function layaModel(value = 'multilingual'): LayaModel {
+function layaModel(value: string = LAYA_MODELS[0]): LayaModel {
   if (!LAYA_MODELS.includes(value as LayaModel)) throw new Error(`--laya-model must be one of ${LAYA_MODELS.join(', ')}`)
   return value as LayaModel
 }
@@ -27,7 +27,7 @@ async function main() {
   if (values.help) {
     console.log('Usage: tax-doc-au <file.pdf|file.txt|pages.json> [--python <executable>] [--ocr]\n' +
       'Optional fallback: --paddle-python <executable> --paddle-models <directory>\n' +
-      'Optional local model: --laya [--laya-url http://127.0.0.1:8000] [--laya-model multilingual|english|typed-decisions]\n' +
+      'Optional local model: --laya [--laya-url http://127.0.0.1:8000] [--laya-model typed-decisions|multilingual|english]\n' +
       'Writes a JSON review manifest to stdout. Local rules only; --laya sends pages the rules leave unknown or ambiguous to a Laya server on this machine. Never uploads or moves inputs.')
     return
   }

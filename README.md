@@ -102,12 +102,12 @@ Install it in its own Python 3.10+ environment and start the server bound to loo
 
 ```sh
 python -m pip install "laya[serve]"
-LAYA_HOST=127.0.0.1 LAYA_MODELS=multilingual laya-serve
+LAYA_HOST=127.0.0.1 LAYA_MODELS=typed-decisions laya-serve
 ```
 
-In PowerShell, set the variables first: `$env:LAYA_HOST = '127.0.0.1'; $env:LAYA_MODELS = 'multilingual'; laya-serve`.
+In PowerShell, set the variables first: `$env:LAYA_HOST = '127.0.0.1'; $env:LAYA_MODELS = 'typed-decisions'; laya-serve`.
 
-The first start downloads the requested checkpoints from Hugging Face into its cache: about 650 MB for `multilingual` and 810 MB for `english`. Set `LAYA_HOST`, because the server otherwise listens on every interface without authentication. `LAYA_API_KEY` adds a bearer token, which the adapter reads from the same variable. `LAYA_DEVICE=cuda` needs a CUDA build of PyTorch, which PyPI does not ship; install one from the PyTorch index that matches your driver, for example `python -m pip install --index-url https://download.pytorch.org/whl/cu132 "torch==2.14.0+cu132"` for a driver that supports CUDA 13.2 (RTX 50-series cards need cu128 or newer). `USE_TF=0` avoids a start-up hang when TensorFlow is installed. `GET /health` lists the loaded checkpoints.
+The first start downloads the requested checkpoints from Hugging Face into its cache: about 810 MB each for `typed-decisions` and `english`, and 650 MB for `multilingual`. Set `LAYA_HOST`, because the server otherwise listens on every interface without authentication. `LAYA_API_KEY` adds a bearer token, which the adapter reads from the same variable. `LAYA_DEVICE=cuda` needs a CUDA build of PyTorch, which PyPI does not ship; install one from the PyTorch index that matches your driver, for example `python -m pip install --index-url https://download.pytorch.org/whl/cu132 "torch==2.14.0+cu132"` for a driver that supports CUDA 13.2 (RTX 50-series cards need cu128 or newer). `USE_TF=0` avoids a start-up hang when TensorFlow is installed. `GET /health` lists the loaded checkpoints.
 
 Then add `--laya` to the CLI:
 
@@ -115,7 +115,7 @@ Then add `--laya` to the CLI:
 pnpm classify:au document.pdf --python /path/to/python --laya
 ```
 
-The CLI keeps every rule outcome and sends only the pages the rules leave unknown or ambiguous, apart from recognised requests and instructions, to the server. It accepts loopback URLs only (`--laya-url`, default `http://127.0.0.1:8000`) and the checkpoints `multilingual` (default), `english` and `typed-decisions` (`--laya-model`); on the synthetic corpus `typed-decisions` made the fewest confident errors on pages the rules could not resolve. Model suggestions carry `method: "model"`, a calibrated confidence and `requiresReview: true`, and the manifest `mode` becomes `local-rules+laya`. A missing server fails the run before any page is read.
+The CLI keeps every rule outcome and sends only the pages the rules leave unknown or ambiguous, apart from recognised requests and instructions, to the server. It accepts loopback URLs only (`--laya-url`, default `http://127.0.0.1:8000`) and the checkpoints `typed-decisions` (default), `multilingual` and `english` (`--laya-model`). The default is the checkpoint that made the fewest confident errors on pages the rules could not resolve in the synthetic evaluation; `multilingual` reads other languages. Model suggestions carry `method: "model"`, a calibrated confidence and `requiresReview: true`, and the manifest `mode` becomes `local-rules+laya`. A missing server fails the run before any page is read.
 
 The library exposes the same adapter:
 
@@ -124,7 +124,7 @@ import { classifyAuPage, layaBackend } from 'tax-doc-classifier-au'
 const result = await classifyAuPage(page, { backend: layaBackend(), allowModelProcessing: true, modelPolicy: 'uncertain' })
 ```
 
-The adapter sends each category's `what` text alone, because Laya caps every option at 48 tokens and shares a 192 or 256 token budget across all 17 options. It reports Laya's calibrated `answer_confidence` as the confidence; Laya's own `confidence` field is an entropy score. The server does not expose `max_len`, so page text beyond about 768 tokens (`multilingual`) or 320 tokens (`english`) is cut silently; a page whose `inputTokens` equals 1,024 or 512 was truncated. Model suggestions need the same review as any other: the zero-shot checkpoints label title-only and sparse pages with a document type at confidence above 0.95, as measured under [Evidence](#evidence) and in [evaluation](docs/evaluation.md).
+The adapter sends each category's `what` text alone, because Laya caps every option at 48 tokens and shares a 192 or 256 token budget across all 17 options. It reports Laya's calibrated `answer_confidence` as the confidence; Laya's own `confidence` field is an entropy score. The server does not expose `max_len`, so page text beyond about 768 tokens (`typed-decisions` and `multilingual`) or 320 tokens (`english`) is cut silently; a page whose `inputTokens` equals 1,024 or 512 was truncated. Model suggestions need the same review as any other: the zero-shot checkpoints label title-only and sparse pages with a document type at confidence above 0.95, as measured under [Evidence](#evidence) and in [evaluation](docs/evaluation.md).
 
 The original US API remains at `tax-doc-classifier-au/us`, with upstream behaviour and PDF limitations. Do not use it as the Australian API. The original [README](docs/upstream-readme.md) is preserved.
 
@@ -136,7 +136,7 @@ A separate 35-case regression set covers address blocks, payment instructions, l
 
 A further 20 hardening cases cover document requests, unpaid receipts, headings without supporting evidence and ordered tax labels. All 20 pass. Headings cannot supply their own supporting evidence; receipt matching distinguishes paid from unpaid. Invoice and BAS label checks scan tokens once, avoiding repeated rescanning on long incomplete input.
 
-With a local Laya server (`multilingual` checkpoint, CPU) the raw model choice matched 15/15 development and 29/40 readable held-out pages, but only 13/31 regression and 8/20 hardening pages, because it assigns a document type to requests, instructions and title-only pages with confidence near 1.0. In uncertain mode, which keeps rule outcomes and bypasses recognised requests and instructions, the pipeline scored 15/15, 40/42, 34/35 and 14/20 against the rules' 100%. Laya adds no accuracy on this corpus; it offers a second opinion on pages the rules cannot resolve. See the [Laya results](eval/au/laya-results.json).
+With a local Laya server (`typed-decisions` checkpoint) the raw model choice matched 15/15 development and 31/40 readable held-out pages, but only 13/31 regression and 7/20 hardening pages, because it assigns a document type to requests, instructions and title-only pages; `multilingual` does the same with twice as many confident errors. In uncertain mode, which keeps rule outcomes and bypasses recognised requests and instructions, the pipeline scored 15/15, 41/42, 35/35 and 16/20 against the rules' 100%. Laya adds no accuracy on this corpus; it offers a second opinion on pages the rules cannot resolve. See the [Laya results](eval/au/laya-results.json).
 
 Every suggestion needs review. Automated coverage is zero; time saved is unmeasured. See [results](eval/au/results.json), [corpus provenance](eval/au/README.md), [evaluation](docs/evaluation.md) and the [repository comparison](docs/repository-comparison.md).
 
@@ -149,8 +149,8 @@ pnpm build
 pnpm eval:au
 python scripts/test_pdf_bridges.py
 python scripts/test_pdf_native.py
-pnpm test:pdf /path/to/python-with-pdf-inspector
-pnpm eval:au:laya --model multilingual
+pnpm test:pdf /path/to/python-with-pdf-inspector [/path/to/paddle-python /path/to/official_models]
+pnpm eval:au:laya
 ```
 
 The full PDF check requires the offline runtime and exercises native pages, image-only refusal, OCR, empty pages and the built CLI. The Laya evaluation needs a running `laya-serve` and rewrites `eval/au/laya-results.json`; CI does not run it. CI runs TypeScript, unit tests, dependency-free Python bridge tests, builds and text evaluation on Windows and Linux. A separate CI job installs requirements-pdf.txt and checks real native PDFs, early limits and sanitised subprocess failures. Full OCR with cached models remains a separate local integration check.
