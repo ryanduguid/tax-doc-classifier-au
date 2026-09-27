@@ -19,7 +19,37 @@ The separate optimisation set was added after reproducing layout failures. Its 3
 
 The keyword baseline chooses the first category whose name appears anywhere in the text. The rules require a heading and supporting evidence, detect conflicting categories, and abstain on recognised instructional content. Neither method performs financial extraction.
 
-Every result requires review. Review rate: 100%. Automated coverage: 0%. Automatic error rate: not measurable because nothing is automatically accepted. Review time saved: not measured. Model calibration and live TypeSafe performance: not measured.
+Every result requires review. Review rate: 100%. Automated coverage: 0%. Automatic error rate: not measurable because nothing is automatically accepted. Review time saved: not measured. Live TypeSafe performance: not measured. A local Laya model was measured on 27 September 2026; see below.
+
+## Local model: Laya
+
+Measured on 27 September 2026 with laya 0.3.20 served by `laya-serve` on this Windows machine through `pnpm eval:au:laya`, with the default gate of 0.95. The tables are runs on the machine's RTX 5080 (torch 2.14.0+cu132, `LAYA_DEVICE=cuda`) after three not-paid receipt cases joined the hardening set; the earlier CPU runs, before those cases, agreed to within one gated answer per checkpoint. Each readable page is sent once per checkpoint and its answer replayed for both policies; unreadable pages and pages with OCR warnings never reach a model. No request filled a checkpoint's context, so the truncation abstention never fired here. The [results file](../eval/au/laya-results.json) records the default `typed-decisions` run.
+
+Raw model choice against the truth label, before any rule or gate (every answer was valid):
+
+| Dataset | Pages sent | `typed-decisions` | `multilingual` | `english` | Wrong at or above 0.95, `typed-decisions` / `multilingual` / `english` |
+|---|---:|---:|---:|---:|---:|
+| Development | 15 | 15 | 15 | 15 | 0 / 0 / 0 |
+| Held-out | 40 | 31 | 29 | 28 | 3 / 8 / 8 |
+| Regression | 31 | 13 | 13 | 13 | 6 / 17 / 17 |
+| Hardening | 23 | 8 | 9 | 8 | 10 / 12 / 12 |
+
+The model identifies most synthetic pages that contain a whole document. Its errors are concentrated on pages whose truth is unknown or ambiguous: requests for a document, instructions, templates, headings without supporting evidence, not-paid receipts and sparse text. It labels these with the document type they mention, usually at confidence 1.0 on `multilingual` and `english`, so the gate does not catch them. `typed-decisions`, which its authors fine-tuned on invoice processing and three other workflows, is less sure of itself (mean confidence 0.84 when right on the held-out set and 0.75 when wrong) and made 19 confident errors across the four sets against 37 for `multilingual`. Mean confidence is not a calibration measurement.
+
+Pipeline outcomes with `classifyAuPage`, all cases including unreadable ones. The bracketed count is the number of named categories a policy suggested where the truth is unknown or ambiguous:
+
+| Dataset | Rules only | Uncertain, `typed-decisions` | Uncertain, `multilingual` | Compare, `typed-decisions` | Compare, `multilingual` |
+|---|---:|---:|---:|---:|---:|
+| Development | 15/15 | 15/15 (0) | 15/15 (0) | 7/15 | 14/15 |
+| Held-out | 42/42 | 41/42 (1) | 40/42 (2) | 17/42 | 33/42 |
+| Regression | 35/35 | 35/35 (0) | 34/35 (1) | 19/35 | 19/35 |
+| Hardening | 23/23 | 17/23 (6) | 15/23 (8) | 9/23 | 10/23 |
+
+Compare mode sends every readable page and replaces the rule outcome with the model's, so below-gate agreement becomes unknown and disagreement becomes ambiguous; it exists for evaluation and punishes the lower confidence of `typed-decisions`. Uncertain mode keeps every resolved rule outcome and asks the model only about pages the rules cannot resolve. Its first run with `multilingual` scored 15/15, 36/42, 19/35 and 10/20, because recognised requests and instructions were still sent to the model; uncertain mode now keeps the rule outcome for pages with the reason `context_only_or_instructions`, and the same rule applies to any backend. Every remaining uncertain-mode error is a false suggestion on a title-only, sparse or not-paid page, where the rules abstain for lack of evidence and the model asserts the mentioned type. No policy recovered a known category the rules had missed, because this corpus contains none.
+
+That last point limits what these figures show. The same synthetic material shaped the rules, the request bypass and the checkpoint choice, so `typed-decisions` is a provisional default. The benefit a model could add, recovering known documents the rules miss, can only be measured on an independently labelled set that contains such pages, split by issuer and layout rather than by page.
+
+On the GPU each checkpoint answered the 109 distinct pages in 4.6 to 5.8 seconds including a cold start, about 30 milliseconds per call once warm. On the CPU the earlier runs took about 0.4 seconds per call for `multilingual`, 0.56 for `typed-decisions` and 0.7 for `english`. These are single runs on one machine, not a throughput benchmark. Laya adds no accuracy on this corpus, where the rules already score 100%. Laya's own documentation reports that fine-tuning on labelled decisions is where its accuracy improves; that has not been attempted here.
 
 ## PDF and OCR checks
 
@@ -44,10 +74,10 @@ No general head-to-head accuracy claim is supported. Handwriting, severe blur, w
 ## Software verification
 
 - Frozen dependency installation, TypeScript checking and build pass.
-- 43 TypeScript tests pass, covering the original US identifier contract, Australian abstention, malformed model responses, explicit model authorisation, evidence privacy, page validation, quality gates, model routing, OCR confidence validation, batch limits and adversarial rule performance. Type checking also covers the Australian evaluation and integration scripts.
+- 64 TypeScript tests pass, covering the original US identifier contract, Australian abstention, malformed model responses, explicit model authorisation, both System One adapters, refused redirects, retry option validation, context truncation, ambiguity kept through model failures, negated payment evidence, evidence privacy, page validation, quality gates, model routing, OCR confidence validation, batch limits and adversarial rule performance. Type checking also covers the Australian evaluation and integration scripts.
 - 17 dependency-free Python tests pass for preflight ordering, file/page/pixel limits, page numbering, offline routing, model refusal, batch failure isolation, malformed OCR output and resource cleanup.
 - 5 Python integration tests pass with real native and synthetic boundary PDFs, including a 501-page refusal, oversized geometry refusal before OCR, JSON output and sanitised subprocess failures.
-- Native PDF and offline OCR integration checks pass, including the built CLI.
+- Native PDF and offline OCR integration checks pass, including the built CLI. Rerun on 27 September 2026 with the Paddle fallback: `pnpm test:pdf` reported both PDF integration and Paddle fallback passes in 26 seconds. Raising `OMP_NUM_THREADS` from 1 to 6 or 12 for the Paddle process changed nothing measurable (about 12.8 seconds for two separate processes and 10 seconds for one batch either way), so process start-up and model loading, not inference threads, set the fallback's cost.
 - Optional Paddle recovery, missing-model refusal and native-page bypass checks pass.
 - Package contents were inspected: Australian runtime, both Python bridges and licences are included; tests, model weights and local environments are excluded.
 - Synthetic PDF previews were visually checked for legible source text before interpreting the OCR results.
@@ -56,9 +86,9 @@ The repository has no lint command. CI now includes both fast bridge tests and a
 
 ## Rule matching and processing limits
 
-The hardening set contains 20 new development examples. It tests requests and enquiries, unpaid receipts, sparse or repeated headings, positive controls and token order. All pass. The original development and holdout files remain unchanged.
+The hardening set contains 23 development examples. It tests requests and enquiries, unpaid and explicitly not-paid receipts, sparse or repeated headings, positive controls and token order. All pass. The original development and holdout files remain unchanged. Three cases added on 27 September 2026 pin the receipt rule to affirmative payment evidence: "Receipt" with "NOT PAID" or "Not yet paid" previously matched, because the support pattern found "paid" inside the negation.
 
-The previous invoice support regex repeatedly rescanned incomplete input. On a synthetic page containing repeated GST tokens without a total, the second assessment measured 26, 99 and 394 ms at about 20,000, 40,000 and 80,000 characters. The replacement scans tokens once. Seven new samples at each size gave medians of 0.64, 1.111 and 1.777 ms. See the [recorded samples](../eval/au/rule-performance.json). The earlier figures are single samples and the new figures are medians; neither is a production latency promise. A test caps four repeated-token cases near the 200,000-character limit and a whitespace-padding case at a generous one second combined.
+The previous invoice support regex repeatedly rescanned incomplete input. On a synthetic page containing repeated GST tokens without a total, the second assessment measured 26, 99 and 394 ms at about 20,000, 40,000 and 80,000 characters. The replacement scans tokens once. Seven new samples at each size gave medians of 0.64, 1.111 and 1.777 ms. See the [recorded samples](../eval/au/rule-performance.json). The earlier figures are single samples and the new figures are medians; neither is a production latency promise. A test caps four repeated-token cases near the 200,000-character limit and a whitespace-padding case at a generous one second combined. The two request patterns anchored at a line start used `^\s*`, which with multiline matching rescanned every following blank line and grew quadratically (about 1.2 seconds for 20,000 leading newlines); they now consume indentation only, and the same test covers 190,000 characters of newline, CRLF and mixed padding before a request.
 
 File size and PDF page count are checked before extraction. OCR geometry checks reject more than 20 million pixels or 10,000 pixels on either side before image allocation. Tests use small vector-only PDFs with large page counts or dimensions, so rejection does not require allocating oversized images. The limits bound requested render images, not all parser or model memory.
 
@@ -73,7 +103,7 @@ The local batch API reuses one Paddle instance across selected documents. Two pa
 
 See the [machine-readable measurement](../eval/au/paddle-batch-benchmark.json). These two samples show less elapsed time for this repeated fixture on this Windows machine. They do not establish throughput across real issuers or scan quality. The integration check also verifies native-page bypass, line-confidence alignment and failure isolation for a missing document between successful documents.
 
-Optional model routing now supports `modelPolicy: 'uncertain'`. Stub-backend tests confirm zero calls for a resolved invoice and one authorised call for an unresolved page. Comparison mode remains the default. No hosted inference or token-cost benchmark was run.
+Optional model routing now supports `modelPolicy: 'uncertain'`. Stub-backend tests confirm zero calls for a resolved invoice, zero calls for a recognised request and one authorised call for an unresolved page. Comparison mode remains the default. No hosted inference or token-cost benchmark was run; the local Laya measurement is above.
 
 ## Next evaluation
 

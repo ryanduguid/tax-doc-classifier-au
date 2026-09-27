@@ -9,6 +9,11 @@ it('bounds repeated-token failure cases near the maximum accepted page length', 
     expect(classifyAuRules({ page: 1, text, extraction: 'native' }).documentType).toBe('unknown')
   }
   expect(classifyAuRules({ page: 1, text: ' '.repeat(190_000) + 'Unlisted document', extraction: 'native' }).documentType).toBe('unknown')
+  // Blank lines before a request: the context patterns must not rescan them from every line start.
+  for (const gap of ['\n', '\r\n', ' \t\n']) {
+    expect(classifyAuRules({ page: 1, text: gap.repeat(Math.floor(190_000 / gap.length)) + 'Please send a tax invoice\nGST and total due', extraction: 'native' }).reason)
+      .toBe('context_only_or_instructions')
+  }
   // A generous regression ceiling, not a latency promise. The prior regex took seconds.
   expect(performance.now() - start).toBeLessThan(1000)
 })

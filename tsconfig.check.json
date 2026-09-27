@@ -1,5 +1,15 @@
 {
   "extends": "./tsconfig.json",
-  "compilerOptions": { "rootDir": ".", "noEmit": true },
-  "include": ["src", "eval/au/*.ts", "scripts/test-au-pdf.ts", "scripts/probe-au-ocr.ts", "scripts/benchmark-au-paddle.ts"]
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true
+  },
+  "include": [
+    "src",
+    "eval/au/*.ts",
+    "scripts/test-au-pdf.ts",
+    "scripts/probe-au-ocr.ts",
+    "scripts/benchmark-au-paddle.ts"
+  ],
+  "exclude": []
 }
