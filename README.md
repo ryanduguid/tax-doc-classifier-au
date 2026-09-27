@@ -107,7 +107,7 @@ LAYA_HOST=127.0.0.1 LAYA_MODELS=multilingual laya-serve
 
 In PowerShell, set the variables first: `$env:LAYA_HOST = '127.0.0.1'; $env:LAYA_MODELS = 'multilingual'; laya-serve`.
 
-The first start downloads the requested checkpoints from Hugging Face into its cache: about 650 MB for `multilingual` and 810 MB for `english`. Set `LAYA_HOST`, because the server otherwise listens on every interface without authentication. `LAYA_API_KEY` adds a bearer token, which the adapter reads from the same variable. `LAYA_DEVICE=cuda` needs a CUDA build of PyTorch, and `USE_TF=0` avoids a start-up hang when TensorFlow is installed. `GET /health` lists the loaded checkpoints.
+The first start downloads the requested checkpoints from Hugging Face into its cache: about 650 MB for `multilingual` and 810 MB for `english`. Set `LAYA_HOST`, because the server otherwise listens on every interface without authentication. `LAYA_API_KEY` adds a bearer token, which the adapter reads from the same variable. `LAYA_DEVICE=cuda` needs a CUDA build of PyTorch, which PyPI does not ship; install one from the PyTorch index that matches your driver, for example `python -m pip install --index-url https://download.pytorch.org/whl/cu132 "torch==2.14.0+cu132"` for a driver that supports CUDA 13.2 (RTX 50-series cards need cu128 or newer). `USE_TF=0` avoids a start-up hang when TensorFlow is installed. `GET /health` lists the loaded checkpoints.
 
 Then add `--laya` to the CLI:
 
