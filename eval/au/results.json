@@ -5,7 +5,7 @@
     "development": "cdb8cfa78d6df8d5a49c01d2d0d51272fe11c3bbf6b0843f3cb154e0e9f40fa9",
     "held-out": "96e115e6d3d3e63747b8a09cceaddfb4c6e500b9ca47a79e64786990ed094827",
     "regression": "656a3108d63d270f4ba59c66bcd64d768826b7d576286a5f7cf9c1ef322db550",
-    "hardening": "13ae39bb09811d12d23fea7703e77a69e16deee2497ff069870074cfc2a853ef"
+    "hardening": "1d62c947404b543b58338ce284c3a30b4a7b54a305ea55f5f9aff950f417deef"
   },
   "modelEvaluated": false,
   "reviewRate": 1,
@@ -969,12 +969,12 @@
     },
     "hardening": {
       "rules": {
-        "cases": 20,
-        "correct": 20,
+        "cases": 23,
+        "correct": 23,
         "accuracy": 1,
-        "knownCases": 8,
-        "suggestions": 8,
-        "suggestionCoverage": 0.4,
+        "knownCases": 9,
+        "suggestions": 9,
+        "suggestionCoverage": 0.391304347826087,
         "suggestionPrecision": 1,
         "perCategory": {
           "income-statement": {
@@ -1056,8 +1056,8 @@
             "precision": 1
           },
           "receipt": {
-            "cases": 1,
-            "correct": 1,
+            "cases": 2,
+            "correct": 2,
             "recall": 1,
             "precision": 1
           },
@@ -1068,8 +1068,8 @@
             "precision": null
           },
           "unknown": {
-            "cases": 12,
-            "correct": 12,
+            "cases": 14,
+            "correct": 14,
             "recall": 1,
             "precision": 1
           },
@@ -1089,13 +1089,13 @@
         "errors": []
       },
       "keywordBaseline": {
-        "cases": 20,
-        "correct": 10,
-        "accuracy": 0.5,
-        "knownCases": 8,
-        "suggestions": 16,
-        "suggestionCoverage": 0.8,
-        "suggestionPrecision": 0.4375,
+        "cases": 23,
+        "correct": 11,
+        "accuracy": 0.4782608695652174,
+        "knownCases": 9,
+        "suggestions": 19,
+        "suggestionCoverage": 0.8260869565217391,
+        "suggestionPrecision": 0.42105263157894735,
         "perCategory": {
           "income-statement": {
             "cases": 0,
@@ -1176,8 +1176,8 @@
             "precision": 0.5
           },
           "receipt": {
-            "cases": 1,
-            "correct": 1,
+            "cases": 2,
+            "correct": 2,
             "recall": 1,
             "precision": 0.3333333333333333
           },
@@ -1188,9 +1188,9 @@
             "precision": null
           },
           "unknown": {
-            "cases": 12,
+            "cases": 14,
             "correct": 3,
-            "recall": 0.25,
+            "recall": 0.21428571428571427,
             "precision": 0.75
           },
           "ambiguous": {
@@ -1256,6 +1256,16 @@
             "id": "hard-rental-prefix-not-support",
             "truth": "unknown",
             "prediction": "rental-statement"
+          },
+          {
+            "id": "hard-receipt-not-paid",
+            "truth": "unknown",
+            "prediction": "receipt"
+          },
+          {
+            "id": "hard-receipt-not-yet-paid",
+            "truth": "unknown",
+            "prediction": "receipt"
           }
         ]
       }

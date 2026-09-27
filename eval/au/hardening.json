@@ -138,5 +138,26 @@
     "label": "unknown",
     "text": "Rental statement\nRental statement copy",
     "extraction": "native"
+  },
+  {
+    "id": "hard-receipt-not-paid",
+    "group": "hard-receipt-not-paid",
+    "label": "unknown",
+    "text": "Receipt\nNOT PAID\nTotal 110",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-receipt-not-yet-paid",
+    "group": "hard-receipt-not-yet-paid",
+    "label": "unknown",
+    "text": "Receipt\nNot yet paid\nPayment method: card",
+    "extraction": "native"
+  },
+  {
+    "id": "hard-receipt-paid-control",
+    "group": "hard-receipt-paid-control",
+    "label": "receipt",
+    "text": "Sales receipt\nPaid in full by card\nTotal 66",
+    "extraction": "native"
   }
 ]

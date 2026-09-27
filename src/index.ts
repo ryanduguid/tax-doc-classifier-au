@@ -1,7 +1,7 @@
 export { ID_GRAMMAR, isFormId, formOf, pageOf, parentOf, mefNameToId, labelOf, irsPdfName } from './ids.js'
 export { buildState, isBlank, isCoverSheet, linesOf, pdfPageCount, pdfPageLines } from './state.js'
 export type { PageState } from './state.js'
-export { jevBackend, layaBackend, LAYA_MODELS, LAYA_DEFAULT_URL } from './backend.js'
+export { jevBackend, layaBackend, localLayaUrl, LAYA_MODELS, LAYA_CONTEXT, LAYA_DEFAULT_URL } from './backend.js'
 export type { Backend, Criterion, ChoiceQuestion, ChoiceAnswer, AskResult, JevOptions, LayaOptions, LayaModel } from './backend.js'
 export { classifyPage, criterionFor, firstListCriteria, familyOf, membersOf, KINDS, KIND_CRITERIA, RARE_PARENTS } from './classify.js'
 export type { Criteria, CriteriaEntry, ClassifyOptions, PageResult, Kind } from './classify.js'

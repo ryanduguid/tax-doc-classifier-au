@@ -85,6 +85,21 @@ describe('Australian review contract', () => {
     expect(r.documentType).toBe('ambiguous')
     expect(r.candidates).toEqual(['tax-invoice', 'receipt'])
   })
+  it('keeps the rules\' ambiguity when the model step fails', async () => {
+    const combined = { ...invoice, text: invoice.text + '\nPayment receipt\nPaid by card' }
+    const failing: Backend = { ask: async () => { throw new Error('down') } }
+    expect(await classifyAuPage(combined, authorised(failing))).toMatchObject({ documentType: 'ambiguous', reason: 'model_unavailable', candidates: ['tax-invoice', 'receipt'] })
+    expect(await classifyAuPage(combined, authorised(backend({})))).toMatchObject({ documentType: 'ambiguous', reason: 'invalid_model_response' })
+    expect(await classifyAuPage({ ...combined, text: combined.text + '\n' + 'x'.repeat(20_001) }, authorised(backend(answer()))))
+      .toMatchObject({ documentType: 'ambiguous', reason: 'model_input_too_long', calls: 0 })
+  })
+  it('abstains when the provider cut the page to its context limit', async () => {
+    const b: Backend = { ask: async () => ({ answers: { document: answer() }, inputTokens: 1024, truncated: true }) }
+    expect(await classifyAuPage(invoice, authorised(b))).toMatchObject({ documentType: 'unknown', reason: 'model_input_truncated', calls: 1, inputTokens: 1024 })
+  })
+  it.each(['Receipt\nNOT PAID\nTotal 110', 'Receipt\nNot yet paid\nPayment method: card', 'Receipt\nPayment not received\nTotal 110'])('does not treat negated payment as receipt evidence', text => {
+    expect(classifyAuRules({ ...invoice, text }).documentType).toBe('unknown')
+  })
   it.each(['Instructions for completing a tax invoice\nGST and total due', 'Please send a tax invoice\nGST and total due'])('does not classify instructions as the referenced document', text => {
     expect(classifyAuRules({ ...invoice, text }).documentType).toBe('unknown')
   })

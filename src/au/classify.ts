@@ -59,7 +59,10 @@ const RULES: Rule[] = [
   { type: 'tax-return', heading: /\b(?:individual|company|trust|partnership|superannuation fund) tax return\b/i, support: /income|deductions|declaration|distribution/i },
   { type: 'tax-invoice', heading: /\btax invoice\b/i,
     support: text => orderedTokens(text, /\b(?:GST|total|balance)\b/gi, [['gst', 'total'], ['gst', 'balance'], ['total', 'gst']]) },
-  { type: 'receipt', heading: /\b(?:payment |sales )?receipt\b/i, support: /\b(?:paid|payment received|payment method)\b/i },
+  // A receipt needs affirmative payment evidence; "not paid" contains "paid" and must not count.
+  { type: 'receipt', heading: /\b(?:payment |sales )?receipt\b/i,
+    support: text => !/\b(?:not|never)\s+(?:yet\s+)?(?:been\s+)?paid\b|\bpayment\s+(?:not|never)\s+(?:yet\s+)?received\b|\bunpaid\b|\bawaiting payment\b/i.test(text) &&
+      /\b(?:paid|payment received|payment method)\b/i.test(text) },
   { type: 'private-health-statement', heading: /\b(?:private health insurance(?: tax)? statement|annual private health statement)\b/i, support: /rebate|benefit code|tax claim code/i },
 ]
 
@@ -67,8 +70,9 @@ const RULES: Rule[] = [
 const DOCUMENT_NAMES = `(?:${RULES.map(rule => rule.heading.source).join('|')}|\\b(?:document|form|invoice|statement|assessment|tax return)\\b)`
 const DOCUMENT_OBJECT = `(?:(?:a|an|the|your|my|our|this|that)\\s+)?(?:copy\\b|${DOCUMENT_NAMES})`
 const CONTEXT_ONLY = [
-  new RegExp(String.raw`^\s*(?:[#>*-]+\s*)?instructions\s+(?:for|on)\s+(?:(?:completing|preparing|filling(?:\s+(?:in|out))?)\s+)?${DOCUMENT_OBJECT}`, 'im'),
-  new RegExp(String.raw`^\s*(?:[#>*-]+\s*)?(?:(?:subject|re|fw|fwd):[ \t]*)*${DOCUMENT_NAMES}\s+(?:copy\s+)?(?:request|enquiry|inquiry)[ \t]*[.!?:]?[ \t]*$`, 'im'),
+  // Line-start indentation only: `^\s*` with the m flag rescans every blank line that follows and grows quadratically.
+  new RegExp(String.raw`^[ \t]*(?:[#>*-]+\s*)?instructions\s+(?:for|on)\s+(?:(?:completing|preparing|filling(?:\s+(?:in|out))?)\s+)?${DOCUMENT_OBJECT}`, 'im'),
+  new RegExp(String.raw`^[ \t]*(?:[#>*-]+\s*)?(?:(?:subject|re|fw|fwd):[ \t]*)*${DOCUMENT_NAMES}\s+(?:copy\s+)?(?:request|enquiry|inquiry)[ \t]*[.!?:]?[ \t]*$`, 'im'),
   new RegExp(String.raw`\b(?:(?:could|can|would) you (?:please )?|please )(?:send|provide|supply|request)\s+(?:(?:me|us)\s+(?:with\s+)?)?${DOCUMENT_OBJECT}`, 'i'),
   new RegExp(String.raw`\brequest(?:ing)?\s+(?:for\s+)?${DOCUMENT_OBJECT}`, 'i'),
   new RegExp(String.raw`${DOCUMENT_NAMES}\s+template\b|\btemplate\s+(?:for\s+)?${DOCUMENT_OBJECT}`, 'i'),
@@ -129,7 +133,7 @@ export function classifyAuRules(page: AuPage): AuResult {
 }
 
 const OUTCOMES = [...AU_TYPES, 'unknown', 'ambiguous']
-function validAnswer(value: unknown): value is ChoiceAnswer {
+export function validAnswer(value: unknown): value is ChoiceAnswer {
   const a = value as ChoiceAnswer | null
   if (!a || !OUTCOMES.includes(a.choice) || !Number.isFinite(a.confidence) || a.confidence < 0 || a.confidence > 1 ||
       !a.probabilities || typeof a.probabilities !== 'object' || Array.isArray(a.probabilities)) return false
@@ -153,8 +157,10 @@ export async function classifyAuPage(page: AuPage, opts: AuOptions = {}): Promis
   // Recognised requests and instructions keep the rule outcome: a model labels them as the document they mention.
   if (policy === 'uncertain' && (AU_TYPES.includes(local.documentType as AuDocumentType) || local.reason === 'context_only_or_instructions')) return local
   if (!opts.allowModelProcessing) throw new Error('Model processing requires explicit authorisation to send page text.')
+  // A failed model step keeps the rules' ambiguity; it must not quietly become unknown.
+  const fallback: AuOutcome = local.documentType === 'ambiguous' ? 'ambiguous' : 'unknown'
   // Do not silently truncate: useful evidence may be at the end of a statement.
-  if (page.text.length > 20_000) return { ...local, documentType: 'unknown', reason: 'model_input_too_long' }
+  if (page.text.length > 20_000) return { ...local, documentType: fallback, reason: 'model_input_too_long' }
   const criteria: Record<string, Criterion> = { ...AU_CATALOGUE,
     unknown: { what: 'Unlisted, foreign, insufficient evidence, instructions, templates, correspondence or a request for documents.' },
     ambiguous: { what: 'Two or more document categories are present and cannot be separated on this page.' } }
@@ -164,7 +170,11 @@ export async function classifyAuPage(page: AuPage, opts: AuOptions = {}): Promis
     })
     const answer = response?.answers?.document
     if (!validAnswer(answer) || !Number.isSafeInteger(response.inputTokens) || response.inputTokens < 0) {
-      return { ...local, documentType: 'unknown', method: 'model', reason: 'invalid_model_response', calls: 1 }
+      return { ...local, documentType: fallback, method: 'model', reason: 'invalid_model_response', calls: 1 }
+    }
+    // The provider cut the page to fit its context, so the answer may rest on an incomplete page.
+    if (response.truncated) {
+      return { ...local, documentType: fallback, method: 'model', reason: 'model_input_truncated', calls: 1, inputTokens: response.inputTokens }
     }
     const candidate = AU_TYPES.includes(answer.choice as AuDocumentType) ? answer.choice as AuDocumentType : null
     const disagreement = candidate && local.candidates.length > 0 && !local.candidates.includes(candidate)
@@ -177,6 +187,6 @@ export async function classifyAuPage(page: AuPage, opts: AuOptions = {}): Promis
         'conflicting_category_evidence' : answer.confidence < gate ? 'below_model_gate' : 'model_suggestion_requires_validation' }
   } catch {
     // Provider errors can echo request contents. Keep errors out of the review manifest.
-    return { ...local, documentType: 'unknown', method: 'model', confidence: null, calls: 1, reason: 'model_unavailable' }
+    return { ...local, documentType: fallback, method: 'model', confidence: null, calls: 1, reason: 'model_unavailable' }
   }
 }

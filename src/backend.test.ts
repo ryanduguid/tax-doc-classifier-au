@@ -16,10 +16,11 @@ describe('Laya backend', () => {
     vi.stubEnv('LAYA_API_KEY', '')
     fetchMock.mockResolvedValueOnce(reply(200, layaReply))
     const result = await layaBackend({ baseUrl: 'http://127.0.0.1:8000/' }).ask({ page: 1, text: 'Tax invoice' }, question)
-    expect(result).toEqual({ answers: { document: { choice: 'tax-invoice', confidence: 0.83, probabilities: { 'tax-invoice': 0.83, unknown: 0.17 } } }, inputTokens: 57 })
+    expect(result).toEqual({ answers: { document: { choice: 'tax-invoice', confidence: 0.83, probabilities: { 'tax-invoice': 0.83, unknown: 0.17 } } }, inputTokens: 57, truncated: false })
     const [url, init] = fetchMock.mock.calls[0]
     expect(url).toBe('http://127.0.0.1:8000/v1/systemone')
     expect(init.headers).toEqual({ 'Content-Type': 'application/json' })
+    expect(init.redirect).toBe('error')
     expect(JSON.parse(init.body)).toEqual({ model: 'typed-decisions', state: { page: 1, text: 'Tax invoice' },
       questions: { document: { type: 'choice', instructions: 'Classify.', criteria: { 'tax-invoice': 'Tax invoice.', unknown: 'Anything else.' } } } })
   })
@@ -49,7 +50,24 @@ describe('Laya backend', () => {
   })
   it('passes malformed answers through for the caller to reject', async () => {
     fetchMock.mockResolvedValueOnce(reply(200, { answers: { document: 'bad' } }))
-    expect(await layaBackend().ask('text', question)).toEqual({ answers: { document: 'bad' }, inputTokens: 0 })
+    expect(await layaBackend().ask('text', question)).toEqual({ answers: { document: 'bad' }, inputTokens: 0, truncated: false })
+  })
+  it('flags a page the server cut to its context limit', async () => {
+    fetchMock.mockResolvedValueOnce(reply(200, { ...layaReply, usage: { input_tokens: 1024, output_tokens: 0 } }))
+    expect((await layaBackend().ask('text', question)).truncated).toBe(true)
+    fetchMock.mockResolvedValueOnce(reply(200, { ...layaReply, usage: { input_tokens: 512, output_tokens: 0 } }))
+    expect((await layaBackend({ model: 'english' }).ask('text', question)).truncated).toBe(true)
+  })
+  it('retries when the body cannot be read', async () => {
+    vi.useFakeTimers()
+    fetchMock.mockResolvedValueOnce({ ok: true, status: 200, text: () => Promise.reject(new Error('socket closed')) })
+      .mockResolvedValueOnce(reply(200, layaReply))
+    const pending = layaBackend({ retries: 2 }).ask('text', question)
+    await vi.advanceTimersByTimeAsync(1500)
+    expect((await pending).inputTokens).toBe(57)
+  })
+  it.each([{ retries: 0 }, { retries: 1.5 }, { retries: NaN }, { timeoutMs: 0 }, { timeoutMs: -1 }])('rejects invalid options %o', opts => {
+    expect(() => layaBackend(opts)).toThrow(/retries|timeoutMs/)
   })
 })
 

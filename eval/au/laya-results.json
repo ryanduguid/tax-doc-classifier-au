@@ -1,26 +1,26 @@
 {
-  "schema": "au-laya-evaluation-1",
+  "schema": "au-laya-evaluation-2",
   "corpus": "synthetic-development-holdout",
   "hashes": {
     "development": "cdb8cfa78d6df8d5a49c01d2d0d51272fe11c3bbf6b0843f3cb154e0e9f40fa9",
     "held-out": "96e115e6d3d3e63747b8a09cceaddfb4c6e500b9ca47a79e64786990ed094827",
     "regression": "656a3108d63d270f4ba59c66bcd64d768826b7d576286a5f7cf9c1ef322db550",
-    "hardening": "13ae39bb09811d12d23fea7703e77a69e16deee2497ff069870074cfc2a853ef"
+    "hardening": "1d62c947404b543b58338ce284c3a30b4a7b54a305ea55f5f9aff950f417deef"
   },
-  "measuredAt": "2026-09-27T10:53:02.496Z",
+  "revision": "d21e0e3",
+  "measuredAt": "2026-09-27T11:19:24.597Z",
   "checkpoint": "typed-decisions",
   "gate": 0.95,
   "server": {
     "url": "http://127.0.0.1:8000",
-    "status": "ok",
+    "device": "cuda",
     "loaded": [
-      "typed-decisions",
-      "multilingual"
-    ],
-    "device": "cuda"
+      "multilingual",
+      "english"
+    ]
   },
-  "calls": 106,
-  "elapsedMs": 3150,
+  "calls": 109,
+  "elapsedMs": 5764,
   "results": {
     "development": {
       "compare": {
@@ -182,7 +182,13 @@
             "truth": "private-health-statement",
             "prediction": "unknown"
           }
-        ]
+        ],
+        "transitions": {
+          "retained": 7,
+          "recovered": 0,
+          "degraded": 8,
+          "falseSuggestions": 0
+        }
       },
       "uncertain": {
         "cases": 15,
@@ -302,17 +308,26 @@
             "precision": null
           }
         },
-        "errors": []
+        "errors": [],
+        "transitions": {
+          "retained": 15,
+          "recovered": 0,
+          "degraded": 0,
+          "falseSuggestions": 0
+        }
       },
       "modelOnly": {
-        "pages": 15,
+        "pagesSent": 15,
+        "failed": [],
+        "invalid": [],
+        "valid": 15,
         "correct": 15,
         "accuracy": 1,
         "correctAtGate": 7,
         "wrongAtGate": 0,
         "meanConfidenceCorrect": 0.916,
         "meanConfidenceWrong": null,
-        "pagesAtContextLimit": 0,
+        "truncated": 0,
         "errors": []
       }
     },
@@ -561,7 +576,13 @@
             "truth": "unknown",
             "prediction": "receipt"
           }
-        ]
+        ],
+        "transitions": {
+          "retained": 17,
+          "recovered": 0,
+          "degraded": 25,
+          "falseSuggestions": 3
+        }
       },
       "uncertain": {
         "cases": 42,
@@ -687,17 +708,26 @@
             "truth": "unknown",
             "prediction": "receipt"
           }
-        ]
+        ],
+        "transitions": {
+          "retained": 41,
+          "recovered": 0,
+          "degraded": 1,
+          "falseSuggestions": 1
+        }
       },
       "modelOnly": {
-        "pages": 40,
+        "pagesSent": 40,
+        "failed": [],
+        "invalid": [],
+        "valid": 40,
         "correct": 31,
         "accuracy": 0.775,
         "correctAtGate": 8,
         "wrongAtGate": 3,
         "meanConfidenceCorrect": 0.843,
         "meanConfidenceWrong": 0.751,
-        "pagesAtContextLimit": 0,
+        "truncated": 0,
         "errors": [
           {
             "id": "edge-1",
@@ -956,7 +986,13 @@
             "truth": "tax-invoice",
             "prediction": "unknown"
           }
-        ]
+        ],
+        "transitions": {
+          "retained": 19,
+          "recovered": 0,
+          "degraded": 16,
+          "falseSuggestions": 5
+        }
       },
       "uncertain": {
         "cases": 35,
@@ -1076,17 +1112,26 @@
             "precision": 1
           }
         },
-        "errors": []
+        "errors": [],
+        "transitions": {
+          "retained": 35,
+          "recovered": 0,
+          "degraded": 0,
+          "falseSuggestions": 0
+        }
       },
       "modelOnly": {
-        "pages": 31,
+        "pagesSent": 31,
+        "failed": [],
+        "invalid": [],
+        "valid": 31,
         "correct": 13,
         "accuracy": 0.419,
         "correctAtGate": 2,
         "wrongAtGate": 6,
         "meanConfidenceCorrect": 0.908,
         "meanConfidenceWrong": 0.874,
-        "pagesAtContextLimit": 0,
+        "truncated": 0,
         "errors": [
           {
             "id": "reg-instruction-title",
@@ -1201,12 +1246,12 @@
     },
     "hardening": {
       "compare": {
-        "cases": 20,
-        "correct": 8,
-        "accuracy": 0.4,
-        "knownCases": 8,
-        "suggestions": 12,
-        "suggestionCoverage": 0.6,
+        "cases": 23,
+        "correct": 9,
+        "accuracy": 0.391304347826087,
+        "knownCases": 9,
+        "suggestions": 15,
+        "suggestionCoverage": 0.6521739130434783,
         "suggestionPrecision": 0.3333333333333333,
         "perCategory": {
           "income-statement": {
@@ -1288,10 +1333,10 @@
             "precision": 0.3333333333333333
           },
           "receipt": {
-            "cases": 1,
-            "correct": 1,
+            "cases": 2,
+            "correct": 2,
             "recall": 1,
-            "precision": 0.5
+            "precision": 0.4
           },
           "private-health-statement": {
             "cases": 0,
@@ -1300,9 +1345,9 @@
             "precision": null
           },
           "unknown": {
-            "cases": 12,
+            "cases": 14,
             "correct": 4,
-            "recall": 0.3333333333333333,
+            "recall": 0.2857142857142857,
             "precision": 0.5714285714285714
           },
           "ambiguous": {
@@ -1378,17 +1423,33 @@
             "id": "hard-rental-prefix-not-support",
             "truth": "unknown",
             "prediction": "rental-statement"
+          },
+          {
+            "id": "hard-receipt-not-paid",
+            "truth": "unknown",
+            "prediction": "receipt"
+          },
+          {
+            "id": "hard-receipt-not-yet-paid",
+            "truth": "unknown",
+            "prediction": "receipt"
           }
-        ]
+        ],
+        "transitions": {
+          "retained": 9,
+          "recovered": 0,
+          "degraded": 14,
+          "falseSuggestions": 10
+        }
       },
       "uncertain": {
-        "cases": 20,
-        "correct": 16,
-        "accuracy": 0.8,
-        "knownCases": 8,
-        "suggestions": 12,
-        "suggestionCoverage": 0.6,
-        "suggestionPrecision": 0.6666666666666666,
+        "cases": 23,
+        "correct": 17,
+        "accuracy": 0.7391304347826086,
+        "knownCases": 9,
+        "suggestions": 15,
+        "suggestionCoverage": 0.6521739130434783,
+        "suggestionPrecision": 0.6,
         "perCategory": {
           "income-statement": {
             "cases": 0,
@@ -1469,10 +1530,10 @@
             "precision": 1
           },
           "receipt": {
-            "cases": 1,
-            "correct": 1,
+            "cases": 2,
+            "correct": 2,
             "recall": 1,
-            "precision": 0.5
+            "precision": 0.4
           },
           "private-health-statement": {
             "cases": 0,
@@ -1481,9 +1542,9 @@
             "precision": null
           },
           "unknown": {
-            "cases": 12,
+            "cases": 14,
             "correct": 8,
-            "recall": 0.6666666666666666,
+            "recall": 0.5714285714285714,
             "precision": 1
           },
           "ambiguous": {
@@ -1519,18 +1580,37 @@
             "id": "hard-rental-prefix-not-support",
             "truth": "unknown",
             "prediction": "rental-statement"
+          },
+          {
+            "id": "hard-receipt-not-paid",
+            "truth": "unknown",
+            "prediction": "receipt"
+          },
+          {
+            "id": "hard-receipt-not-yet-paid",
+            "truth": "unknown",
+            "prediction": "receipt"
           }
-        ]
+        ],
+        "transitions": {
+          "retained": 17,
+          "recovered": 0,
+          "degraded": 6,
+          "falseSuggestions": 6
+        }
       },
       "modelOnly": {
-        "pages": 20,
-        "correct": 7,
-        "accuracy": 0.35,
-        "correctAtGate": 4,
-        "wrongAtGate": 8,
-        "meanConfidenceCorrect": 0.961,
-        "meanConfidenceWrong": 0.858,
-        "pagesAtContextLimit": 0,
+        "pagesSent": 23,
+        "failed": [],
+        "invalid": [],
+        "valid": 23,
+        "correct": 8,
+        "accuracy": 0.348,
+        "correctAtGate": 5,
+        "wrongAtGate": 10,
+        "meanConfidenceCorrect": 0.964,
+        "meanConfidenceWrong": 0.876,
+        "truncated": 0,
         "errors": [
           {
             "id": "hard-invoice-enquiry",
@@ -1609,6 +1689,18 @@
             "truth": "unknown",
             "choice": "rental-statement",
             "confidence": 0.9819
+          },
+          {
+            "id": "hard-receipt-not-paid",
+            "truth": "unknown",
+            "choice": "receipt",
+            "confidence": 0.9926
+          },
+          {
+            "id": "hard-receipt-not-yet-paid",
+            "truth": "unknown",
+            "choice": "receipt",
+            "confidence": 0.9952
           }
         ]
       }

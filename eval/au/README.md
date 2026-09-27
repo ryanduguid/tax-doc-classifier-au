@@ -10,7 +10,7 @@ Do not tune rules against held-out failures and continue calling the same set un
 
 `regression.json` contains 35 additional development cases written for the optimisation pass. They cover the reproduced layout failures, negative controls, ambiguous evidence and line-confidence handling. Twenty-one cases added during PR review distinguish ordinary payment instructions from document requests beyond the heading window. They were used during implementation and are not held out. The original development and held-out files remain unchanged.
 
-`hardening.json` adds 20 development cases for requests and enquiries, headings without independent support, unpaid receipts and token ordering. These were also used during implementation and are not held out.
+`hardening.json` adds 23 development cases for requests and enquiries, headings without independent support, unpaid and explicitly not-paid receipts and token ordering. These were also used during implementation and are not held out.
 
 `pnpm eval:au` requires zero errors in each dataset, at least 15 development, 42 held-out, 35 regression and 20 hardening cases, and all 15 categories in each original dataset. These are regression gates, not a production accuracy target. The runner writes results before checking gates so failed runs retain diagnostic evidence, then exits unsuccessfully on a regression.
 

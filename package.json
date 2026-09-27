@@ -8,13 +8,13 @@
   "types": "dist/au/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/au/index.js",
-      "types": "./dist/au/index.d.ts"
+      "types": "./dist/au/index.d.ts",
+      "import": "./dist/au/index.js"
     },
     "./data/criteria.json": "./data/criteria.json",
     "./au": {
-      "import": "./dist/au/index.js",
-      "types": "./dist/au/index.d.ts"
+      "types": "./dist/au/index.d.ts",
+      "import": "./dist/au/index.js"
     },
     "./us": {
       "types": "./dist/index.d.ts",
@@ -47,7 +47,7 @@
   ],
   "scripts": {
     "prepare": "tsc -p tsconfig.json",
-    "build": "tsc -p tsconfig.json",
+    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.check.json",
     "test": "vitest run",
     "build-criteria": "tsx scripts/build-criteria.ts",
