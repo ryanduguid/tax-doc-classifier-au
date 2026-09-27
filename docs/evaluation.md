@@ -23,31 +23,31 @@ Every result requires review. Review rate: 100%. Automated coverage: 0%. Automat
 
 ## Local model: Laya
 
-Measured on 27 September 2026 with laya 0.3.20 served by `laya-serve` on this Windows machine, CPU only with 12 threads, through `pnpm eval:au:laya`. The default gate of 0.95 applied. Each readable page was sent once per checkpoint; unreadable pages and pages with OCR warnings never reach a model. The [results file](../eval/au/laya-results.json) records the `multilingual` run; the `english` figures below came from the same script with `--model english`.
+Measured on 27 September 2026 with laya 0.3.20 served by `laya-serve` on this Windows machine, CPU only with 12 threads, through `pnpm eval:au:laya`. The default gate of 0.95 applied. Each readable page was sent once per checkpoint; unreadable pages and pages with OCR warnings never reach a model. The [results file](../eval/au/laya-results.json) records the `multilingual` run; the `english` and `typed-decisions` figures below came from the same script with `--model`.
 
 Raw model choice against the truth label, before any rule or gate:
 
-| Dataset | Pages sent | `multilingual` correct | `english` correct | Wrong at or above 0.95 (`multilingual`) |
-|---|---:|---:|---:|---:|
-| Development | 15 | 15 | 15 | 0 |
-| Held-out | 40 | 29 | 28 | 7 |
-| Regression | 31 | 13 | 13 | 17 |
-| Hardening | 20 | 8 | 7 | 10 |
+| Dataset | Pages sent | `multilingual` | `english` | `typed-decisions` | Wrong at or above 0.95, `multilingual` / `typed-decisions` |
+|---|---:|---:|---:|---:|---:|
+| Development | 15 | 15 | 15 | 15 | 0 / 0 |
+| Held-out | 40 | 29 | 28 | 31 | 7 / 3 |
+| Regression | 31 | 13 | 13 | 13 | 17 / 5 |
+| Hardening | 20 | 8 | 7 | 7 | 10 / 8 |
 
-The model identifies most synthetic pages that contain a whole document. Its errors are concentrated on pages whose truth is unknown or ambiguous: requests for a document, instructions, templates, headings without supporting evidence and sparse text. It labels these with the document type they mention, usually at confidence 1.0, so the gate does not catch them. Mean confidence on the held-out set was 0.98 when right and 0.87 when wrong. No page reached the checkpoint's context limit, so truncation of long pages remains unmeasured.
+The model identifies most synthetic pages that contain a whole document. Its errors are concentrated on pages whose truth is unknown or ambiguous: requests for a document, instructions, templates, headings without supporting evidence and sparse text. It labels these with the document type they mention, usually at confidence 1.0 on `multilingual`, so the gate does not catch them. Mean confidence on the held-out set was 0.98 when right and 0.87 when wrong. The `typed-decisions` checkpoint, which its authors fine-tuned on invoice processing and three other workflows, is less sure of itself: mean confidence 0.84 when right on the held-out set, and 16 confident errors across the four sets against 34 for `multilingual`. No page reached any checkpoint's context limit, so truncation of long pages remains unmeasured.
 
 Pipeline outcomes with `classifyAuPage`, all cases including unreadable ones:
 
-| Dataset | Rules only | Uncertain mode with Laya | Compare mode with Laya |
-|---|---:|---:|---:|
-| Development | 15/15 | 15/15 | 14/15 |
-| Held-out | 42/42 | 40/42 | 33/42 |
-| Regression | 35/35 | 34/35 | 19/35 |
-| Hardening | 20/20 | 14/20 | 9/20 |
+| Dataset | Rules only | Uncertain, `multilingual` | Uncertain, `typed-decisions` | Compare, `multilingual` |
+|---|---:|---:|---:|---:|
+| Development | 15/15 | 15/15 | 15/15 | 14/15 |
+| Held-out | 42/42 | 40/42 | 41/42 | 33/42 |
+| Regression | 35/35 | 34/35 | 35/35 | 19/35 |
+| Hardening | 20/20 | 14/20 | 16/20 | 9/20 |
 
-Compare mode sends every readable page and replaces the rule outcome with the model's, so below-gate agreement becomes unknown and disagreement becomes ambiguous; it exists for evaluation. Uncertain mode keeps every rule outcome and asks the model only about pages the rules cannot resolve. Its first run scored 15/15, 36/42, 19/35 and 10/20, because recognised requests and instructions were still sent to the model. Uncertain mode now keeps the rule outcome for pages with the reason `context_only_or_instructions`, which gave the figures in the table; the same change applies to any backend. The remaining uncertain-mode errors are title-only and sparse pages, where the rules abstain for lack of supporting evidence and the model asserts the titled type. The `english` checkpoint gave the same pipeline figures in uncertain mode.
+Compare mode sends every readable page and replaces the rule outcome with the model's, so below-gate agreement becomes unknown and disagreement becomes ambiguous; it exists for evaluation. It punishes the lower confidence of `typed-decisions` with the 0.95 gate: 8/15, 17/42, 20/35 and 8/20. Uncertain mode keeps every rule outcome and asks the model only about pages the rules cannot resolve. Its first run with `multilingual` scored 15/15, 36/42, 19/35 and 10/20, because recognised requests and instructions were still sent to the model. Uncertain mode now keeps the rule outcome for pages with the reason `context_only_or_instructions`, which gave the figures in the table; the same change applies to any backend. The remaining uncertain-mode errors are title-only and sparse pages, where the rules abstain for lack of supporting evidence and the model asserts the titled type. The `english` checkpoint gave the same pipeline figures as `multilingual` in uncertain mode.
 
-The `multilingual` run made 122 calls in 48 seconds, about 0.4 seconds per call on the CPU; `english` took 85 seconds for the same calls. These are single runs on one machine, not a throughput benchmark. Laya adds no accuracy on this corpus, where the rules already score 100%. Its value, if any, lies on real pages the rules cannot resolve, which this synthetic corpus does not contain. Laya's own documentation reports that fine-tuning on labelled decisions is where its accuracy improves; that has not been attempted.
+The `multilingual` run made 122 calls in 48 seconds, about 0.4 seconds per call on the CPU; `english` took 85 seconds and `typed-decisions` 68 seconds for the same calls. These are single runs on one machine, not a throughput benchmark. Laya adds no accuracy on this corpus, where the rules already score 100%. Its value, if any, lies on real pages the rules cannot resolve, which this synthetic corpus does not contain. For English documents in uncertain mode, `typed-decisions` made the fewest confident errors on such pages; `multilingual` remains the default for its context length and speed until real pages decide between them. Laya's own documentation reports that fine-tuning on labelled decisions is where its accuracy improves; that has not been attempted here.
 
 ## PDF and OCR checks
 

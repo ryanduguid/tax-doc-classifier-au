@@ -115,7 +115,7 @@ Then add `--laya` to the CLI:
 pnpm classify:au document.pdf --python /path/to/python --laya
 ```
 
-The CLI keeps every rule outcome and sends only the pages the rules leave unknown or ambiguous, apart from recognised requests and instructions, to the server. It accepts loopback URLs only (`--laya-url`, default `http://127.0.0.1:8000`) and the checkpoints `multilingual` (default), `english` and `typed-decisions` (`--laya-model`). Model suggestions carry `method: "model"`, a calibrated confidence and `requiresReview: true`, and the manifest `mode` becomes `local-rules+laya`. A missing server fails the run before any page is read.
+The CLI keeps every rule outcome and sends only the pages the rules leave unknown or ambiguous, apart from recognised requests and instructions, to the server. It accepts loopback URLs only (`--laya-url`, default `http://127.0.0.1:8000`) and the checkpoints `multilingual` (default), `english` and `typed-decisions` (`--laya-model`); on the synthetic corpus `typed-decisions` made the fewest confident errors on pages the rules could not resolve. Model suggestions carry `method: "model"`, a calibrated confidence and `requiresReview: true`, and the manifest `mode` becomes `local-rules+laya`. A missing server fails the run before any page is read.
 
 The library exposes the same adapter:
 
