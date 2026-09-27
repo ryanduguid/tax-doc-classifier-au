@@ -1,4 +1,4 @@
-import { AU_TYPES, type AuDocumentType } from './catalogue.js'
+import { AU_TAXONOMY_VERSION, AU_TYPES, type AuDocumentType } from './catalogue.js'
 import type { AuOutcome, AuResult } from './classify.js'
 
 /** One page's decision; `null` means the reviewer has not decided, which is never counted as accepted or unknown. */
@@ -11,6 +11,9 @@ const OUTCOMES: AuOutcome[] = [...AU_TYPES, 'unknown', 'ambiguous', 'unreadable'
 const METHODS = ['rules', 'model', 'extraction'] as const
 const named = (outcome: AuOutcome) => AU_TYPES.includes(outcome as AuDocumentType)
 const sha256 = /^[a-f0-9]{64}$/
+// Reasons are fixed identifiers; anything else could be text or a path from an edited manifest.
+const identifier = /^[a-z_]{1,64}$/
+const isoDate = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?(Z|[+-]\d{2}:\d{2}))?$/
 
 export function validateManifest(input: unknown): ReviewManifest {
   const m = input as ReviewManifest | null
@@ -20,9 +23,10 @@ export function validateManifest(input: unknown): ReviewManifest {
   const pages = new Set<number>()
   for (const r of m.results) {
     if (!r || !Number.isSafeInteger(r.page) || r.page < 1 || pages.has(r.page) || !sha256.test(r.textSha256 ?? '') ||
-        !OUTCOMES.includes(r.documentType) || !METHODS.includes(r.method) || typeof r.taxonomyVersion !== 'string') {
-      throw new Error('Manifest results need unique pages with textSha256, documentType, method and taxonomyVersion.')
+        !OUTCOMES.includes(r.documentType) || !METHODS.includes(r.method) || !identifier.test(r.reason ?? '')) {
+      throw new Error('Manifest results need unique pages with textSha256, documentType, method and a reason identifier.')
     }
+    if (r.taxonomyVersion !== AU_TAXONOMY_VERSION) throw new Error(`Manifest results must use taxonomy ${AU_TAXONOMY_VERSION}.`)
     pages.add(r.page)
   }
   return m
@@ -42,8 +46,8 @@ export function validateDecisions(input: unknown): ReviewDecisions {
     throw new Error('Supply a decisions file (schema au-review-decisions-1) with its manifestSha256 and 1 to 500 decisions.')
   }
   if ((d.reviewer !== undefined && (typeof d.reviewer !== 'string' || d.reviewer.length > 64 || /[@\s]/.test(d.reviewer))) ||
-      (d.reviewedAt !== undefined && (typeof d.reviewedAt !== 'string' || (d.reviewedAt !== '' && Number.isNaN(Date.parse(d.reviewedAt)))))) {
-    throw new Error('reviewer must be a short pseudonym without spaces or @, and reviewedAt an ISO date or empty.')
+      (d.reviewedAt !== undefined && (typeof d.reviewedAt !== 'string' || (d.reviewedAt !== '' && (!isoDate.test(d.reviewedAt) || Number.isNaN(Date.parse(d.reviewedAt))))))) {
+    throw new Error('reviewer must be a short pseudonym without spaces or @, and reviewedAt an ISO 8601 date such as 2026-09-27T10:00:00+10:00 or empty.')
   }
   const pages = new Set<number>()
   for (const x of d.decisions) {
@@ -81,7 +85,7 @@ export function summariseReview(manifest: ReviewManifest, decisions: ReviewDecis
   return {
     schema: 'au-review-summary-1',
     manifestSha256,
-    taxonomyVersion: [...new Set(manifest.results.map(r => r.taxonomyVersion))].join(','),
+    taxonomyVersion: AU_TAXONOMY_VERSION,
     reviewer: decisions.reviewer || null,
     reviewedAt: decisions.reviewedAt || null,
     // The reviewer saw each suggestion while deciding, so acceptance is agreement, not independent truth.
@@ -92,8 +96,12 @@ export function summariseReview(manifest: ReviewManifest, decisions: ReviewDecis
     accepted: accepted(reviewed),
     // A named suggestion the reviewer set to unknown, ambiguous or unreadable.
     falseSuggestions: reviewed.filter(x => named(x.suggested) && !named(x.decision)).length,
+    // A named suggestion the reviewer replaced with a different category.
+    changedCategory: reviewed.filter(x => named(x.suggested) && named(x.decision) && x.decision !== x.suggested).length,
     // A named decision where the pipeline had left the page unknown or ambiguous: what a model could recover.
     missedByPipeline: reviewed.filter(x => ['unknown', 'ambiguous'].includes(x.suggested) && named(x.decision)).length,
+    // A named decision on a page the pipeline could not read: an extraction gap, not a classification miss.
+    unreadableButNamed: reviewed.filter(x => x.suggested === 'unreadable' && named(x.decision)).length,
     methods,
     perCategory,
     labels: reviewed,
