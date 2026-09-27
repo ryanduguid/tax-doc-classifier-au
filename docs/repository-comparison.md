@@ -34,11 +34,11 @@ No equivalent Australian page classifier or pdf-inspector wrapper was found in t
 
 ## What the comparison changed
 
-- Local processing is the default. The CLI has no hosted model switch.
+- Local processing is the default. The CLI has no hosted model switch; its optional Laya switch accepts a loopback server only.
 - Every result is a suggestion with a page reference, text hash, method and review reason.
 - Unknown and ambiguous outcomes survive classification. No forced choice among known forms.
 - OCR and classification are separate. Empty extracted text never proves a blank page.
-- A future model can use the existing Backend interface only with explicit processing authorisation.
+- A model can use the existing Backend interface only with explicit processing authorisation. Laya was the first measured; see [evaluation](evaluation.md).
 - A simple keyword baseline is measured alongside the rules. Corpus hashes and errors are recorded.
 
 ## What would change the decision

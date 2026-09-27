@@ -19,7 +19,35 @@ The separate optimisation set was added after reproducing layout failures. Its 3
 
 The keyword baseline chooses the first category whose name appears anywhere in the text. The rules require a heading and supporting evidence, detect conflicting categories, and abstain on recognised instructional content. Neither method performs financial extraction.
 
-Every result requires review. Review rate: 100%. Automated coverage: 0%. Automatic error rate: not measurable because nothing is automatically accepted. Review time saved: not measured. Model calibration and live TypeSafe performance: not measured.
+Every result requires review. Review rate: 100%. Automated coverage: 0%. Automatic error rate: not measurable because nothing is automatically accepted. Review time saved: not measured. Live TypeSafe performance: not measured. A local Laya model was measured on 27 September 2026; see below.
+
+## Local model: Laya
+
+Measured on 27 September 2026 with laya 0.3.20 served by `laya-serve` on this Windows machine, CPU only with 12 threads, through `pnpm eval:au:laya`. The default gate of 0.95 applied. Each readable page was sent once per checkpoint; unreadable pages and pages with OCR warnings never reach a model. The [results file](../eval/au/laya-results.json) records the `multilingual` run; the `english` figures below came from the same script with `--model english`.
+
+Raw model choice against the truth label, before any rule or gate:
+
+| Dataset | Pages sent | `multilingual` correct | `english` correct | Wrong at or above 0.95 (`multilingual`) |
+|---|---:|---:|---:|---:|
+| Development | 15 | 15 | 15 | 0 |
+| Held-out | 40 | 29 | 28 | 7 |
+| Regression | 31 | 13 | 13 | 17 |
+| Hardening | 20 | 8 | 7 | 10 |
+
+The model identifies most synthetic pages that contain a whole document. Its errors are concentrated on pages whose truth is unknown or ambiguous: requests for a document, instructions, templates, headings without supporting evidence and sparse text. It labels these with the document type they mention, usually at confidence 1.0, so the gate does not catch them. Mean confidence on the held-out set was 0.98 when right and 0.87 when wrong. No page reached the checkpoint's context limit, so truncation of long pages remains unmeasured.
+
+Pipeline outcomes with `classifyAuPage`, all cases including unreadable ones:
+
+| Dataset | Rules only | Uncertain mode with Laya | Compare mode with Laya |
+|---|---:|---:|---:|
+| Development | 15/15 | 15/15 | 14/15 |
+| Held-out | 42/42 | 40/42 | 33/42 |
+| Regression | 35/35 | 34/35 | 19/35 |
+| Hardening | 20/20 | 14/20 | 9/20 |
+
+Compare mode sends every readable page and replaces the rule outcome with the model's, so below-gate agreement becomes unknown and disagreement becomes ambiguous; it exists for evaluation. Uncertain mode keeps every rule outcome and asks the model only about pages the rules cannot resolve. Its first run scored 15/15, 36/42, 19/35 and 10/20, because recognised requests and instructions were still sent to the model. Uncertain mode now keeps the rule outcome for pages with the reason `context_only_or_instructions`, which gave the figures in the table; the same change applies to any backend. The remaining uncertain-mode errors are title-only and sparse pages, where the rules abstain for lack of supporting evidence and the model asserts the titled type. The `english` checkpoint gave the same pipeline figures in uncertain mode.
+
+The `multilingual` run made 122 calls in 48 seconds, about 0.4 seconds per call on the CPU; `english` took 85 seconds for the same calls. These are single runs on one machine, not a throughput benchmark. Laya adds no accuracy on this corpus, where the rules already score 100%. Its value, if any, lies on real pages the rules cannot resolve, which this synthetic corpus does not contain. Laya's own documentation reports that fine-tuning on labelled decisions is where its accuracy improves; that has not been attempted.
 
 ## PDF and OCR checks
 
@@ -44,7 +72,7 @@ No general head-to-head accuracy claim is supported. Handwriting, severe blur, w
 ## Software verification
 
 - Frozen dependency installation, TypeScript checking and build pass.
-- 43 TypeScript tests pass, covering the original US identifier contract, Australian abstention, malformed model responses, explicit model authorisation, evidence privacy, page validation, quality gates, model routing, OCR confidence validation, batch limits and adversarial rule performance. Type checking also covers the Australian evaluation and integration scripts.
+- 52 TypeScript tests pass, covering the original US identifier contract, Australian abstention, malformed model responses, explicit model authorisation, both System One adapters, evidence privacy, page validation, quality gates, model routing, OCR confidence validation, batch limits and adversarial rule performance. Type checking also covers the Australian evaluation and integration scripts.
 - 17 dependency-free Python tests pass for preflight ordering, file/page/pixel limits, page numbering, offline routing, model refusal, batch failure isolation, malformed OCR output and resource cleanup.
 - 5 Python integration tests pass with real native and synthetic boundary PDFs, including a 501-page refusal, oversized geometry refusal before OCR, JSON output and sanitised subprocess failures.
 - Native PDF and offline OCR integration checks pass, including the built CLI.
@@ -73,7 +101,7 @@ The local batch API reuses one Paddle instance across selected documents. Two pa
 
 See the [machine-readable measurement](../eval/au/paddle-batch-benchmark.json). These two samples show less elapsed time for this repeated fixture on this Windows machine. They do not establish throughput across real issuers or scan quality. The integration check also verifies native-page bypass, line-confidence alignment and failure isolation for a missing document between successful documents.
 
-Optional model routing now supports `modelPolicy: 'uncertain'`. Stub-backend tests confirm zero calls for a resolved invoice and one authorised call for an unresolved page. Comparison mode remains the default. No hosted inference or token-cost benchmark was run.
+Optional model routing now supports `modelPolicy: 'uncertain'`. Stub-backend tests confirm zero calls for a resolved invoice, zero calls for a recognised request and one authorised call for an unresolved page. Comparison mode remains the default. No hosted inference or token-cost benchmark was run; the local Laya measurement is above.
 
 ## Next evaluation
 

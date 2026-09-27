@@ -1,6 +1,6 @@
 {
   "name": "tax-doc-classifier-au",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Local Australian tax document review pilot with optional model classification",
   "license": "Apache-2.0",
   "type": "module",
@@ -38,6 +38,7 @@
     "docs/evaluation.md",
     "docs/repository-comparison.md",
     "eval/au/results.json",
+    "eval/au/laya-results.json",
     "eval/au/README.md",
     "eval/au/ocr-probe.json",
     "eval/au/paddle-probe.json",
@@ -56,7 +57,8 @@
     "eval:au": "tsx eval/au/run.ts",
     "test:pdf": "tsx scripts/test-au-pdf.ts",
     "probe:ocr": "tsx scripts/probe-au-ocr.ts",
-    "benchmark:paddle": "tsx scripts/benchmark-au-paddle.ts"
+    "benchmark:paddle": "tsx scripts/benchmark-au-paddle.ts",
+    "eval:au:laya": "tsx eval/au/laya.ts"
   },
   "engines": {
     "node": ">=22.13"

@@ -13,3 +13,5 @@ Do not tune rules against held-out failures and continue calling the same set un
 `hardening.json` adds 20 development cases for requests and enquiries, headings without independent support, unpaid receipts and token ordering. These were also used during implementation and are not held out.
 
 `pnpm eval:au` requires zero errors in each dataset, at least 15 development, 42 held-out, 35 regression and 20 hardening cases, and all 15 categories in each original dataset. These are regression gates, not a production accuracy target. The runner writes results before checking gates so failed runs retain diagnostic evidence, then exits unsuccessfully on a regression.
+
+`laya-results.json` records one local run of `pnpm eval:au:laya` against a Laya server on this machine: raw model choices, gated errors, and pipeline outcomes in compare and uncertain modes. It is evidence of one run on synthetic text, not a gate, and CI does not regenerate it.

@@ -50,6 +50,15 @@ describe('Australian review contract', () => {
     await classifyAuPage(invoice, { ...authorised(b), modelPolicy: 'compare' })
     expect(b.ask).toHaveBeenCalledTimes(1)
   })
+  it('keeps recognised requests and instructions away from the model in uncertain mode', async () => {
+    const b = backend(answer())
+    const page = { ...invoice, text: 'Please send a tax invoice\nGST and total due' }
+    expect(await classifyAuPage(page, { ...authorised(b), modelPolicy: 'uncertain' }))
+      .toMatchObject({ documentType: 'unknown', reason: 'context_only_or_instructions', calls: 0 })
+    expect(b.ask).not.toHaveBeenCalled()
+    await classifyAuPage(page, authorised(b))
+    expect(b.ask).toHaveBeenCalledTimes(1)
+  })
   it('requires authorisation and calls the model for unresolved pages in uncertain mode', async () => {
     const b = backend(answer('unknown'))
     const page = { ...invoice, text: 'Unlisted document' }

@@ -150,7 +150,8 @@ export async function classifyAuPage(page: AuPage, opts: AuOptions = {}): Promis
   // A model receives complete text, so do not send partially trusted OCR text.
   if (!opts.backend || local.documentType === 'unreadable' || local.warnings.length ||
       page.ocrLineConfidence?.some(x => x < 0.8)) return local
-  if (policy === 'uncertain' && AU_TYPES.includes(local.documentType as AuDocumentType)) return local
+  // Recognised requests and instructions keep the rule outcome: a model labels them as the document they mention.
+  if (policy === 'uncertain' && (AU_TYPES.includes(local.documentType as AuDocumentType) || local.reason === 'context_only_or_instructions')) return local
   if (!opts.allowModelProcessing) throw new Error('Model processing requires explicit authorisation to send page text.')
   // Do not silently truncate: useful evidence may be at the end of a statement.
   if (page.text.length > 20_000) return { ...local, documentType: 'unknown', reason: 'model_input_too_long' }

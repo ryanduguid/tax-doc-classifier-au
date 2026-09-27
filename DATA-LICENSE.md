@@ -11,6 +11,10 @@ redistributed here.
 The Jev backend calls the TypeSafe API under TypeSafe's own terms of service.
 Nothing in this repository grants access to that API.
 
+The Laya backend calls a Laya server that you run yourself. Laya's weights are
+published by Convai Innovations under Apache-2.0 and are downloaded from Hugging
+Face on first start; nothing here redistributes them.
+
 ## Australian pilot additions
 
 Modified for the Australian fork on 22 September 2026. The Australian taxonomy,

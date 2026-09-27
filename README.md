@@ -88,11 +88,43 @@ const result = classifyAuRules({
 
 Optional `classifyAuPage(page, options)` reuses the upstream `Backend` interface. A supplied backend is called only with `allowModelProcessing: true`, which authorises sending complete page text to that backend. It is not a redaction or compliance control. The CLI exposes local rules only.
 
-Set `modelPolicy: 'uncertain'` to call the backend only for unknown or ambiguous readable pages. Resolved rule suggestions then make zero calls and still require review. The default `modelPolicy: 'compare'` preserves full model comparison for evaluation. Authorisation is required whenever text will be sent; unreadable pages and OCR warnings bypass the model in either mode.
+Set `modelPolicy: 'uncertain'` to call the backend only for unknown or ambiguous readable pages. Resolved rule suggestions then make zero calls and still require review, and pages the rules recognise as requests or instructions keep the rule outcome, because a model labels them as the document they mention. The default `modelPolicy: 'compare'` preserves full model comparison for evaluation. Authorisation is required whenever text will be sent; unreadable pages and OCR warnings bypass the model in either mode.
 
 Model results need valid labels and a complete, consistent probability distribution. Unknown predictions remain unknown, low-confidence predictions abstain, and conflicting evidence is ambiguous. Provider errors become sanitised review reasons. All model suggestions still require review. The default 0.95 gate is experimental; Australian calibration has not been measured.
 
-The default Jev adapter sends text to TypeSafe's hosted API. No live model evaluation was run. Authorise any external processing and review data handling separately.
+Two adapters share the `/v1/systemone` protocol. `jevBackend()` sends text to TypeSafe's hosted API and was not run in this pilot; authorise any external processing and review data handling separately. `layaBackend()` talks to a Laya server on this machine, described next.
+
+## Optional local model: Laya
+
+[Laya](https://huggingface.co/convaiinnovations/laya) is an open-weight decision model from Convai Innovations, released under Apache-2.0, that answers the same typed questions as Jev. Its `laya-serve` process speaks the `/v1/systemone` protocol, so the classifier can use it without page text leaving this machine.
+
+Install it in its own Python 3.10+ environment and start the server bound to loopback:
+
+```sh
+python -m pip install "laya[serve]"
+LAYA_HOST=127.0.0.1 LAYA_MODELS=multilingual laya-serve
+```
+
+In PowerShell, set the variables first: `$env:LAYA_HOST = '127.0.0.1'; $env:LAYA_MODELS = 'multilingual'; laya-serve`.
+
+The first start downloads the requested checkpoints from Hugging Face into its cache: about 650 MB for `multilingual` and 810 MB for `english`. Set `LAYA_HOST`, because the server otherwise listens on every interface without authentication. `LAYA_API_KEY` adds a bearer token, which the adapter reads from the same variable. `LAYA_DEVICE=cuda` needs a CUDA build of PyTorch, and `USE_TF=0` avoids a start-up hang when TensorFlow is installed. `GET /health` lists the loaded checkpoints.
+
+Then add `--laya` to the CLI:
+
+```sh
+pnpm classify:au document.pdf --python /path/to/python --laya
+```
+
+The CLI keeps every rule outcome and sends only the pages the rules leave unknown or ambiguous, apart from recognised requests and instructions, to the server. It accepts loopback URLs only (`--laya-url`, default `http://127.0.0.1:8000`) and the checkpoints `multilingual` (default), `english` and `typed-decisions` (`--laya-model`). Model suggestions carry `method: "model"`, a calibrated confidence and `requiresReview: true`, and the manifest `mode` becomes `local-rules+laya`. A missing server fails the run before any page is read.
+
+The library exposes the same adapter:
+
+```ts
+import { classifyAuPage, layaBackend } from 'tax-doc-classifier-au'
+const result = await classifyAuPage(page, { backend: layaBackend(), allowModelProcessing: true, modelPolicy: 'uncertain' })
+```
+
+The adapter sends each category's `what` text alone, because Laya caps every option at 48 tokens and shares a 192 or 256 token budget across all 17 options. It reports Laya's calibrated `answer_confidence` as the confidence; Laya's own `confidence` field is an entropy score. The server does not expose `max_len`, so page text beyond about 768 tokens (`multilingual`) or 320 tokens (`english`) is cut silently; a page whose `inputTokens` equals 1,024 or 512 was truncated. Model suggestions need the same review as any other: the zero-shot checkpoints label title-only and sparse pages with a document type at confidence above 0.95, as measured under [Evidence](#evidence) and in [evaluation](docs/evaluation.md).
 
 The original US API remains at `tax-doc-classifier-au/us`, with upstream behaviour and PDF limitations. Do not use it as the Australian API. The original [README](docs/upstream-readme.md) is preserved.
 
@@ -103,6 +135,8 @@ Local rules score 15/15 development cases and 42/42 synthetic holdout cases. A c
 A separate 35-case regression set covers address blocks, payment instructions, late mixed headings and unreliable OCR lines. All 35 pass. Evaluation fails on any incorrect prediction, missing category in the original datasets or reduction below their minimum case counts. Updating the saved results does not bypass these gates. New cases are development regressions, not an independent holdout.
 
 A further 20 hardening cases cover document requests, unpaid receipts, headings without supporting evidence and ordered tax labels. All 20 pass. Headings cannot supply their own supporting evidence; receipt matching distinguishes paid from unpaid. Invoice and BAS label checks scan tokens once, avoiding repeated rescanning on long incomplete input.
+
+With a local Laya server (`multilingual` checkpoint, CPU) the raw model choice matched 15/15 development and 29/40 readable held-out pages, but only 13/31 regression and 8/20 hardening pages, because it assigns a document type to requests, instructions and title-only pages with confidence near 1.0. In uncertain mode, which keeps rule outcomes and bypasses recognised requests and instructions, the pipeline scored 15/15, 40/42, 34/35 and 14/20 against the rules' 100%. Laya adds no accuracy on this corpus; it offers a second opinion on pages the rules cannot resolve. See the [Laya results](eval/au/laya-results.json).
 
 Every suggestion needs review. Automated coverage is zero; time saved is unmeasured. See [results](eval/au/results.json), [corpus provenance](eval/au/README.md), [evaluation](docs/evaluation.md) and the [repository comparison](docs/repository-comparison.md).
 
@@ -116,9 +150,10 @@ pnpm eval:au
 python scripts/test_pdf_bridges.py
 python scripts/test_pdf_native.py
 pnpm test:pdf /path/to/python-with-pdf-inspector
+pnpm eval:au:laya --model multilingual
 ```
 
-The full PDF check requires the offline runtime and exercises native pages, image-only refusal, OCR, empty pages and the built CLI. CI runs TypeScript, unit tests, dependency-free Python bridge tests, builds and text evaluation on Windows and Linux. A separate CI job installs requirements-pdf.txt and checks real native PDFs, early limits and sanitised subprocess failures. Full OCR with cached models remains a separate local integration check.
+The full PDF check requires the offline runtime and exercises native pages, image-only refusal, OCR, empty pages and the built CLI. The Laya evaluation needs a running `laya-serve` and rewrites `eval/au/laya-results.json`; CI does not run it. CI runs TypeScript, unit tests, dependency-free Python bridge tests, builds and text evaluation on Windows and Linux. A separate CI job installs requirements-pdf.txt and checks real native PDFs, early limits and sanitised subprocess failures. Full OCR with cached models remains a separate local integration check.
 
 To test the optional fallback as well, append the Paddle Python executable and model directory to `pnpm test:pdf`.
 
