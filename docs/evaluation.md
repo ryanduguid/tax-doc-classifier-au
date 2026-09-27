@@ -107,6 +107,6 @@ Optional model routing now supports `modelPolicy: 'uncertain'`. Stub-backend tes
 
 ## Next evaluation
 
-Collect an independently labelled set with multiple Australian issuers and years, separating issuers/layouts between development and evaluation. Include rare types, missing documents, difficult scans and unrelated pages. Use public or appropriately authorised examples, with source rights recorded.
+Collect an independently labelled set with multiple Australian issuers and years, separating issuers/layouts between development and evaluation. Include rare types, missing documents, difficult scans and unrelated pages. Use public or appropriately authorised examples, with source rights recorded. The `review` subcommand records reviewer decisions against each manifest (suggestions accepted by method and category, named suggestions rejected, pages the pipeline left unresolved that the reviewer could name) and keeps hash-keyed labels without text; those records, with the reviewed documents, are that set. The alternatives that learn from confirmed decisions (Paperless-ngx Auto matching, Docspell auto-tagging, beancount smart_importer) retrain automatically; this pilot records and measures first, because every result still requires review.
 
 Measure suggested-category precision, unknown detection, reviewer acceptance and review time against the current manual process. Only consider automatic routing after an acceptable error budget and held-out calibration have been established. Classification must never establish tax treatment or replace review of amounts.

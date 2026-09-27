@@ -128,6 +128,10 @@ The adapter sends each category's `what` text alone, because Laya caps every opt
 
 The original US API remains at `tax-doc-classifier-au/us`, with upstream behaviour and PDF limitations. Do not use it as the Australian API. The original [README](docs/upstream-readme.md) is preserved.
 
+## Recording review decisions
+
+Every manifest page needs a reviewer's decision, and those decisions are the only accuracy evidence that counts. `tax-doc-au review manifest.json` prints a decisions file with an empty `decision` for every page and the suggestion beside it; fill in the decisions, optionally a pseudonymous `reviewer` and `reviewedAt`, then run `tax-doc-au review manifest.json decisions.json` for a report of suggestions accepted by method and category, named suggestions the reviewer rejected as unknown, ambiguous or unreadable, named suggestions changed to another category, pages the pipeline left unknown or ambiguous that the reviewer could name, pages it could not read that the reviewer could name, and pages left undecided, which never count as accepted or unknown. The file carries the manifest's SHA-256 and each page's `textSha256`, so decisions for another manifest, different text or another taxonomy version are refused, and the report holds hashes, labels and fixed reason identifiers but no text, names or file paths. Acceptance is agreement with a visible suggestion, not independent truth. Keep the reviewed documents with the report: together they form the independently labelled set that the [evaluation](docs/evaluation.md) calls for. Nothing trains on them automatically; the library exposes `decisionTemplate`, `validateDecisions` and `summariseReview` for other tooling.
+
 ## Evidence
 
 Local rules score 15/15 development cases and 42/42 synthetic holdout cases. A category-name keyword baseline scores 11/15 and 20/42. The same author designed the rules and examples: these are development checks, not evidence of field accuracy.

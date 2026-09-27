@@ -41,8 +41,27 @@ No equivalent Australian page classifier or pdf-inspector wrapper was found in t
 - A model can use the existing Backend interface only with explicit processing authorisation. Laya was the first measured; see [evaluation](evaluation.md).
 - A simple keyword baseline is measured alongside the rules. Corpus hashes and errors are recorded.
 
+## Second comparison, 27 September 2026
+
+A follow-up pass over projects that classify financial documents or learn from user decisions. Primary sources were the repositories' READMEs, documentation pages and repository metadata read on 27 September 2026; no alternative was run.
+
+| Repository or service, revision | Evidence | Suitability and decision |
+|---|---|---|
+| [PaperCortex](https://github.com/renefichtmueller/PaperCortex), 6f2c869, MIT, pushed 24 September 2026 | LLM classification for Paperless-ngx through local Ollama models (qwen2.5 7B to 32B, llama3.1, mistral) with embedding models; document types invoice, receipt, contract, tax document, letter, statement, certificate; `CLASSIFICATION_CONFIDENCE` (default 0.7) gates `apply: true`; DATEV export; no accuracy figures. | The same shape as this pilot's optional model step, with a threshold before applying. Its seven generic types are coarser than the 15 Australian categories, and its 7B to 32B models are far heavier than Laya. Not adopted; the gate idea already exists at 0.95. |
+| [Paperless-ngx](https://docs.paperless-ngx.com/advanced_usage/) advanced usage, read 27 September 2026; repository 7b98085, GPL-3.0 | Matching algorithms None, Any, All, Exact, Regular expression, Fuzzy and Auto. Auto trains a neural network on documents already assigned outside the inbox, needs negative examples and retrains periodically. | The heading-plus-support rules correspond to All with ordering constraints. Adopted the first half of the learning loop: recorded reviewer decisions through `tax-doc-au review`. No automatic retraining, because every page still requires review. |
+| [Docspell](https://docspell.org/docs/configure/file-processing/) docs, read 27 September 2026; repository cf3174d, AGPL-3.0 | Auto-tagging learns from existing tags on extracted text on a schedule; training defaults to 600 items and 5,000 characters per text and is memory intensive. | Same pattern on a JVM stack under AGPL. Not adopted. Its item and text limits are a precedent for bounding any future training set. |
+| [beancount smart_importer](https://github.com/beancount/smart_importer), db71e8c, MIT, pushed 26 July 2026 | scikit-learn SVC trained on the user's ledger predicts postings and payees during import; corrections become training data; applied automatically; beta. | The accounting precedent for learning from corrections. Automatic application does not fit the review contract; recording decisions does. |
+| [invoice2data](https://github.com/invoice-x/invoice2data), 9a62ebd, MIT, pushed 26 September 2026 | Issuer templates identified by `keywords` and `exclude_keywords` regex; field extraction; pdfium input by default and several OCR engines. | Extraction rather than classification, and it extracts amounts, which this pilot excludes. Its exclude-keywords idea mirrors the catalogue's `not_for` notes and the request bypass. Not adopted. |
+| stipple.sh classifier, commercial service, read 27 September 2026 | Hosted financial document classifier over payslip, tax invoice, bank statement, salary certificate, PAYG summary and receipt; everything else is other; stateless. | Hosted and closed, so out of scope. Its taxonomy names payslips and salary certificates, which this catalogue maps to unknown. |
+| [Ar86Bat/Finance-Document-Text-Classification](https://huggingface.co/Ar86Bat/Finance-Document-Text-Classification), MIT, DistilBERT 67M | Classifies finance text topics (for example investment restrictions) on a synthetic multilingual set; 98.65% accuracy on its own split. | Topic classification, not document type. Not adopted. |
+
+### What the second comparison changed
+
+- `tax-doc-au review` records reviewer decisions against a manifest and reports acceptance by method and category, rejected named suggestions and pages the pipeline missed, keyed by text hash and without text. This is the labelled set the evaluation needs, gathered as a by-product of review.
+- Not adopted: automatic retraining on decisions (every page still requires review), Ollama LLM classification (heavier than Laya, no accuracy figures), and a payslip or salary-certificate category, which would need a new taxonomy version and new fixtures because the held-out set is immutable.
+
 ## What would change the decision
 
-A requirement for multi-user storage and search would favour adopting Paperless-ngx and integrating the classifier through an API. Complex layout failures could justify comparing Docling on the same approved corpus. Neither need has been established in this pilot.
+A requirement for multi-user storage and search would favour adopting Paperless-ngx and integrating the classifier through an API. Complex layout failures could justify comparing Docling on the same approved corpus. Neither need has been established in this pilot. Reviewed decisions that repeatedly name payslips, superannuation statements or other documents outside the 15 categories would justify a new taxonomy version with its own fixtures.
 
 Do not treat the synthetic score as a product case. Before expanding, measure reviewed classification accuracy, acceptance rate and handling time on an independently labelled, authorised set of Australian issuer layouts. Any hosted evaluation needs a separate data-handling decision and explicit approval.
