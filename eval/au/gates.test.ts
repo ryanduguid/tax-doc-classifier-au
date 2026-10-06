@@ -2,7 +2,7 @@ import { expect, it } from 'vitest'
 import { AU_TYPES } from '../../src/au/catalogue.js'
 import { assertQualityGates } from './gates.js'
 
-const passing = () => Object.fromEntries(Object.entries({ development: 15, 'held-out': 42, regression: 35, hardening: 20 }).map(([name, cases]) =>
+const passing = () => Object.fromEntries(Object.entries({ development: 15, 'held-out': 42, regression: 35, hardening: 23 }).map(([name, cases]) =>
   [name, { rules: { cases, correct: cases, perCategory: Object.fromEntries(AU_TYPES.map(type => [type, { cases: 1 }])) } }]))
 it('accepts complete passing regression reports', () => expect(() => assertQualityGates(passing())).not.toThrow())
 it('rejects incorrect predictions independently of the saved result file', () => {
@@ -17,4 +17,9 @@ it('rejects missing categories and shrunken datasets', () => {
   expect(() => assertQualityGates({})).toThrow('Quality gate failed')
   report.development.rules.cases = report.development.rules.correct = 0
   expect(() => assertQualityGates(report)).toThrow('at least 15')
+})
+it.each([20, 21, 22])('rejects a hardening set reduced to %i passing cases', cases => {
+  const report = passing()
+  report.hardening.rules.cases = report.hardening.rules.correct = cases
+  expect(() => { assertQualityGates(report) }).toThrow('at least 23')
 })

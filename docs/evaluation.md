@@ -1,6 +1,6 @@
 # Pilot evaluation
 
-Measured locally on Windows on 22 September 2026. These are synthetic development and integration results. No client documents or paid classification API calls were used.
+These are synthetic development and integration results, first measured locally on Windows on 22 September 2026. The rules table was rechecked on 5 October 2026; model and OCR measurements retain their dates below. No client documents or paid classification API calls were used.
 
 ## Classification
 
@@ -9,9 +9,9 @@ Measured locally on Windows on 22 September 2026. These are synthetic developmen
 | Development | 15 | 15 | 11 |
 | Held-out synthetic layouts and edge cases | 42 | 42 | 20 |
 | Optimisation regression cases | 35 | 35 | 16 |
-| False-positive and ordering hardening | 20 | 20 | 10 |
+| False-positive and ordering hardening | 23 | 23 | 11 |
 
-The corpus was committed at `6e57d85` before the Australian classifier. The held-out set has 2 examples for each of 15 categories, plus 12 edge cases covering unknown content, ambiguous documents, unreadable input, instructions and foreign forms. The [results file](../eval/au/results.json) records corpus hashes, per-category precision/recall and errors. No held-out case was changed after the first evaluation.
+The original development and held-out corpus was committed at `6e57d85` before the Australian classifier. The held-out set has 2 examples for each of 15 categories, plus 12 edge cases covering unknown content, ambiguous documents, unreadable input, instructions and foreign forms. The [results file](../eval/au/results.json) records corpus hashes, per-category precision/recall and errors. No held-out case was changed after the first evaluation. Both evaluation runners now reject changes to either original file using hashes checked against that commit. The hardening minimum is 23, preventing removal of the three later unpaid-receipt cases without failing the count check.
 
 The same author wrote the cases and the implementation. This is a development holdout, not a blind external benchmark. It deliberately uses compact text examples. Do not use these scores to claim real-world accuracy or transfer the original project's US results to Australia.
 
@@ -74,7 +74,7 @@ No general head-to-head accuracy claim is supported. Handwriting, severe blur, w
 ## Software verification
 
 - Frozen dependency installation, TypeScript checking and build pass.
-- 64 TypeScript tests pass, covering the original US identifier contract, Australian abstention, malformed model responses, explicit model authorisation, both System One adapters, refused redirects, retry option validation, context truncation, ambiguity kept through model failures, negated payment evidence, evidence privacy, page validation, quality gates, model routing, OCR confidence validation, batch limits and adversarial rule performance. Type checking also covers the Australian evaluation and integration scripts.
+- 94 TypeScript tests passed on 6 October 2026, covering the original US identifier contract, Australian abstention, malformed model responses, explicit model authorisation, both System One adapters, refused redirects, retry option validation, context truncation, ambiguity kept through model failures, negated payment evidence, evidence privacy, page validation, corpus identity, quality gates, model routing, OCR confidence validation, batch limits and adversarial rule performance. Type checking also covers the Australian evaluation and integration scripts.
 - 17 dependency-free Python tests pass for preflight ordering, file/page/pixel limits, page numbering, offline routing, model refusal, batch failure isolation, malformed OCR output and resource cleanup.
 - 5 Python integration tests pass with real native and synthetic boundary PDFs, including a 501-page refusal, oversized geometry refusal before OCR, JSON output and sanitised subprocess failures.
 - Native PDF and offline OCR integration checks pass, including the built CLI. Rerun on 27 September 2026 with the Paddle fallback: `pnpm test:pdf` reported both PDF integration and Paddle fallback passes in 26 seconds. Raising `OMP_NUM_THREADS` from 1 to 6 or 12 for the Paddle process changed nothing measurable (about 12.8 seconds for two separate processes and 10 seconds for one batch either way), so process start-up and model loading, not inference threads, set the fallback's cost.
