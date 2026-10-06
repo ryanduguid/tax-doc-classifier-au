@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, it, vi } from 'vitest'
 
-const { ask } = vi.hoisted(() => ({ ask: vi.fn(async () => { throw new Error('evaluation test model unavailable') }) }))
+const { ask } = vi.hoisted(() => ({ ask: vi.fn(() => Promise.reject(new Error('evaluation test model unavailable'))) }))
 vi.mock('../../src/au/index.js', async importOriginal => ({
   ...await importOriginal<typeof import('../../src/au/index.js')>(),
   layaBackend: () => ({ ask }),
@@ -15,8 +15,8 @@ it('writes a separate evaluation without replacing previous evidence', async () 
   const retained = new URL('./laya-results.json', import.meta.url)
   const before = await readFile(retained)
   const argv = process.argv
-  vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ device: 'test', loaded: [] }))))
-  vi.spyOn(console, 'log').mockImplementation(() => {})
+  vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response(JSON.stringify({ device: 'test', loaded: [] })))))
+  vi.spyOn(console, 'log').mockImplementation(() => undefined)
   process.argv = [argv[0], 'eval/au/laya.ts', '--output', output]
   try {
     vi.resetModules()

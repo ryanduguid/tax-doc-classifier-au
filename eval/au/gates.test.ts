@@ -21,5 +21,5 @@ it('rejects missing categories and shrunken datasets', () => {
 it.each([20, 21, 22])('rejects a hardening set reduced to %i passing cases', cases => {
   const report = passing()
   report.hardening.rules.cases = report.hardening.rules.correct = cases
-  expect(() => assertQualityGates(report)).toThrow('at least 23')
+  expect(() => { assertQualityGates(report) }).toThrow('at least 23')
 })

@@ -28,8 +28,9 @@ if (values.output !== undefined) {
 const url = localLayaUrl(values.url)
 const response = await fetch(`${url}/health`, { redirect: 'error', signal: AbortSignal.timeout(5_000) })
 if (!response.ok) throw new Error(`No Laya server answered at ${url}/health.`)
-const health = await response.json() as { device?: string; loaded?: string[] }
-if (!health || typeof health !== 'object' || Array.isArray(health)) throw new Error('Invalid Laya health response.')
+const body: unknown = await response.json()
+if (!body || typeof body !== 'object' || Array.isArray(body)) throw new Error('Invalid Laya health response.')
+const health = body as { device?: string; loaded?: string[] }
 const revision = (() => { try { return execFileSync('git', ['rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim() } catch { return null } })()
 
 // One server request per page, shared by both policy passes, whether it succeeded or failed.
