@@ -5,14 +5,22 @@ import { AU_TYPES, type AuOutcome, type AuPage } from '../../src/au/index.js'
 export type Case = Omit<AuPage, 'page'> & { id: string; group: string; label: AuOutcome }
 export const FILES = ['development', 'held-out', 'regression', 'hardening'] as const
 const OUTCOMES: AuOutcome[] = [...AU_TYPES, 'unknown', 'ambiguous', 'unreadable']
+// Original fixtures committed before the classifier at 6e57d85. Add later cases to the development regression sets.
+const ORIGINAL_HASHES: Record<string, string> = {
+  development: 'cdb8cfa78d6df8d5a49c01d2d0d51272fe11c3bbf6b0843f3cb154e0e9f40fa9',
+  'held-out': '96e115e6d3d3e63747b8a09cceaddfb4c6e500b9ca47a79e64786990ed094827',
+}
 
-export async function loadCorpus(): Promise<{ datasets: Record<string, Case[]>; hashes: Record<string, string> }> {
+export async function loadCorpus(directory = new URL('./', import.meta.url)): Promise<{ datasets: Record<string, Case[]>; hashes: Record<string, string> }> {
   const datasets: Record<string, Case[]> = {}
   const hashes: Record<string, string> = {}
   const ids = new Set<string>(), groups = new Set<string>(), texts = new Set<string>()
   for (const name of FILES) {
-    const raw = await readFile(new URL(`./${name}.json`, import.meta.url), 'utf8')
+    const raw = await readFile(new URL(`${name}.json`, directory), 'utf8')
     hashes[name] = createHash('sha256').update(raw).digest('hex')
+    if (ORIGINAL_HASHES[name] && hashes[name] !== ORIGINAL_HASHES[name]) {
+      throw new Error(`Original ${name} corpus changed. Restore the original file and add development cases to regression.json or hardening.json.`)
+    }
     datasets[name] = JSON.parse(raw)
     for (const row of datasets[name]) {
       if (ids.has(row.id) || groups.has(row.group) || texts.has(row.text)) throw new Error('Duplicate fixture, layout group or text across corpus')

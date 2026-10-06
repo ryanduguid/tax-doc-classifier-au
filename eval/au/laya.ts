@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process'
-import { writeFile } from 'node:fs/promises'
+import { lstat, stat, writeFile } from 'node:fs/promises'
+import { dirname } from 'node:path'
 import { parseArgs } from 'node:util'
 import { AU_TYPES, LAYA_DEFAULT_URL, LAYA_MODELS, classifyAuPage, classifyAuRules, layaBackend, localLayaUrl,
   type AskResult, type AuOutcome, type Backend, type LayaModel } from '../../src/au/index.js'
@@ -9,12 +10,26 @@ import { FILES, evaluate, loadCorpus, type Case } from './corpus.js'
 // Measures a local Laya server on the synthetic corpus. Run laya-serve first; nothing leaves this machine.
 const { values } = parseArgs({ options: {
   model: { type: 'string', default: LAYA_MODELS[0] }, url: { type: 'string', default: LAYA_DEFAULT_URL }, gate: { type: 'string', default: '0.95' },
+  output: { type: 'string' },
 } })
 const model = values.model as LayaModel
 if (!LAYA_MODELS.includes(model)) throw new Error(`--model must be one of ${LAYA_MODELS.join(', ')}`)
 const gate = Number(values.gate)
+if (!Number.isFinite(gate) || gate <= 0 || gate > 1) throw new Error('--gate must be greater than zero and at most one')
+if (values.output !== undefined) {
+  if (!values.output) throw new Error('--output must name a new file')
+  const exists = await lstat(values.output).then(() => true, (error: NodeJS.ErrnoException) => {
+    if (error.code !== 'ENOENT') throw error
+    return false
+  })
+  if (exists) throw new Error('--output already exists; choose a new file')
+  if (!(await stat(dirname(values.output))).isDirectory()) throw new Error('--output parent must be a directory')
+}
 const url = localLayaUrl(values.url)
-const health = await (await fetch(`${url}/health`, { redirect: 'error' })).json() as { device?: string; loaded?: string[] }
+const response = await fetch(`${url}/health`, { redirect: 'error', signal: AbortSignal.timeout(5_000) })
+if (!response.ok) throw new Error(`No Laya server answered at ${url}/health.`)
+const health = await response.json() as { device?: string; loaded?: string[] }
+if (!health || typeof health !== 'object' || Array.isArray(health)) throw new Error('Invalid Laya health response.')
 const revision = (() => { try { return execFileSync('git', ['rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim() } catch { return null } })()
 
 // One server request per page, shared by both policy passes, whether it succeeded or failed.
@@ -83,5 +98,6 @@ for (const name of FILES) {
 const report = { schema: 'au-laya-evaluation-2', corpus: 'synthetic-development-holdout', hashes, revision, measuredAt: new Date().toISOString(),
   checkpoint: model, gate, server: { url, device: health.device ?? null, loaded: health.loaded ?? null }, calls: requests.size,
   elapsedMs: Date.now() - started, results }
-await writeFile(new URL('./laya-results.json', import.meta.url), JSON.stringify(report, null, 2) + '\n')
+await writeFile(values.output ?? new URL('./laya-results.json', import.meta.url), JSON.stringify(report, null, 2) + '\n',
+  { flag: values.output ? 'wx' : 'w' })
 console.log('Every suggestion still requires review. Synthetic results do not establish field accuracy.')

@@ -12,6 +12,18 @@ Do not tune rules against held-out failures and continue calling the same set un
 
 `hardening.json` adds 23 development cases for requests and enquiries, headings without independent support, unpaid and explicitly not-paid receipts and token ordering. These were also used during implementation and are not held out.
 
-`pnpm eval:au` requires zero errors in each dataset, at least 15 development, 42 held-out, 35 regression and 20 hardening cases, and all 15 categories in each original dataset. These are regression gates, not a production accuracy target. The runner writes results before checking gates so failed runs retain diagnostic evidence, then exits unsuccessfully on a regression.
+`pnpm eval:au` requires zero errors in each dataset, at least 15 development, 42 held-out, 35 regression and 23 hardening cases, and all 15 categories in each original dataset. The 23-case minimum includes the three unpaid-receipt regressions. Both evaluation runners check the SHA-256 of the original development and held-out files against their bytes at commit `6e57d85a2a44b4d72c9aa0ddbffda3efcb58acc5` before classification. Relabelling a case or rewriting the saved results cannot satisfy this identity check. Preserve the original files and add development cases to `regression.json` or `hardening.json`.
+
+These are regression gates, not a production accuracy target. An original-corpus mismatch stops before writing results. Otherwise the rules runner writes results before checking prediction gates so failed runs retain diagnostic evidence, then exits unsuccessfully on a regression.
 
 `laya-results.json` records one local run of `pnpm eval:au:laya` against a Laya server on this machine: raw model choices, gated errors, and pipeline outcomes in compare and uncertain modes. It is evidence of one run on synthetic text, not a gate, and CI does not regenerate it.
+
+To retain a new comparison separately, start the local Laya server and run
+`pnpm eval:au:laya --output /path/to/new-comparison.json`. The parent directory
+must exist. Invalid gates, existing outputs and missing output directories stop
+before contacting the server. The gate must be greater than zero and at most
+one. The server health check times out after five seconds. Omitting `--output`
+keeps the existing behaviour of refreshing `laya-results.json`. Each report
+records the corpus hashes, checkpoint, gate, pipeline outcomes and elapsed time.
+Use the same corpus and gate for comparisons. Elapsed time covers both policy
+passes and their shared requests; it is not an isolated model latency measure.
