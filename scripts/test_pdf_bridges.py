@@ -105,7 +105,8 @@ class NativeBridge(unittest.TestCase):
             provenance=NS(hosted_recommended=False, source="ocr", warnings=["check_quality"]))])
         with patch.dict(sys.modules, {"pdf_inspector": self.runtime, "pypdfium2": NS(PdfDocument=Mock(return_value=doc))}), patch.object(native, "check_file"):
             rows = native.extract("fixture.pdf", True)
-        self.runtime.process_pdf_with_ocr.assert_called_once_with("fixture.pdf", offline=True, dpi=150)
+        self.runtime.process_pdf_with_ocr.assert_called_once_with("fixture.pdf", offline=True, dpi=200,
+                                                                hosted_recommendation_confidence=0.9)
         self.assertEqual(rows[0]["ocrEngine"], "pdf-inspector-pp-ocrv6-small")
         self.assertEqual(rows[0]["warnings"], ["check_quality"])
 
