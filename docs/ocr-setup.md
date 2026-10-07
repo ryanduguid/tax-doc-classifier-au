@@ -47,6 +47,8 @@ The bridges check file size before processing and reject PDFs above 50 MiB or 50
 
 The comparison used one clean, one lightly skewed and one sideways synthetic invoice. It does not cover handwriting, severe blur, warped photographs, complex tables or all issuer layouts. Paddle lines below 0.8 confidence are excluded from classification evidence. Reliable remaining lines can support a suggestion, with the warning retained. Missing or malformed confidence data fails closed. Every suggestion still requires review; partially trusted OCR text is not sent to a model.
 
+Paddle keeps scale 2 (144 dpi). On the same 33 benchmark pages (8 October 2026, Windows CPU), it read 99.98% of characters and 99.78% of number fields at scale 2, including the sideways pages. At 200 dpi the 6 pt and 8 pt pages gained the few missing fields, but the noisy JPEG page fell to 92% of characters, and to 78% at 300 dpi. Mean time per page rose from 6.0 s to 8.1 s and 14.0 s.
+
 The fallback has a 120-second process timeout, shared across a batch. Pages remain flagged if it cannot complete. The library batch API accepts up to 50 documents and 500 selected pages, reuses the loaded models, preserves document order and isolates individual extraction failures. A process failure flags every selected page. No hosted fallback is implemented.
 
 The probe's setup time includes model downloads. Inference timings are single local measurements, not comparable service benchmarks or production latency promises.
