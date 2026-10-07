@@ -2,13 +2,25 @@
 
 ## Default runtime
 
-The PDF bridge uses pdf-inspector 1.19.0 for classification and extraction. Install requirements-pdf.txt in a dedicated environment, including pypdfium2 5.13.0 for the page-dimension check that pdf-inspector's API does not expose. Offline OCR also requires the configured PDFium library, ONNX Runtime and cached PP-OCRv6 Small models, as documented in [pdf-inspector's runtime guide](https://github.com/firecrawl/pdf-inspector/blob/main/docs/ocr-runtime.md).
+The PDF bridge uses pdf-inspector 1.25.2 for classification and extraction. Install requirements-pdf.txt in a dedicated environment, including pypdfium2 5.13.0 for the page-dimension check that pdf-inspector's API does not expose. Offline OCR also requires the configured PDFium library, ONNX Runtime and cached PP-OCRv6 Small models, as documented in [pdf-inspector's runtime guide](https://github.com/firecrawl/pdf-inspector/blob/main/docs/ocr-runtime.md).
 
 The tested runtime uses PDFium native-v7988, ONNX Runtime 1.27.0 and model revision oar-ocr-v0.7.0. Its Windows external OCR runtime is documented upstream as preview. The local synthetic integration check passed; that does not establish compatibility across Windows installations.
 
+### Render resolution and review threshold
+
+The bridge renders OCR pages at 200 dpi and flags pages below 0.9 OCR confidence as `needs_ocr`. pdf-inspector's defaults are 150 dpi and 0.5. A synthetic benchmark on 8 October 2026 used 33 fabricated image-only pages (11 conditions, 3 variants each) scored against their ground truth on Windows with pdf-inspector 1.25.2:
+
+| Render dpi | Character accuracy | Number fields found | Mean time per page |
+| --- | --- | --- | --- |
+| 150 | 98.5% | 98.7% | 0.9 s |
+| 200 | 99.99% | 100% | 1.9 s |
+| 300 | 100% | 100% | 2.2 s |
+
+Sideways pages are excluded from those averages. The loss at 150 dpi came from text of 8 pt or smaller: a 6 pt receipt, a 7 pt invoice and an 8 pt statement, where whole statement rows were dropped while page confidence stayed at 0.99. Upright pages scored at least 0.98 confidence; sideways and upside-down pages scored 0.59 to 0.69 and were not flagged under the 0.5 default. At 0.9 they reach the review path and the optional Paddle fallback instead of passing garbled text to classification. Handwriting, photographs of paper, complex tables and non-English text were not tested.
+
 ## Why add full PaddleOCR
 
-The lighter engine read the upright and 3-degree skewed synthetic invoices. A 90-degree sideways image produced 53 characters but no useful category. The full PaddleOCR pipeline detected 270-degree orientation and recovered the invoice text. See [local probe results](../eval/au/ocr-probe.json) and [Paddle probe](../eval/au/paddle-probe.json).
+The lighter engine read the upright and 3-degree skewed synthetic invoices. With pdf-inspector 1.19.0 at 150 dpi, a 90-degree sideways image produced 53 characters but no useful category; the 0.9 review threshold now marks it `needs_ocr`. The full PaddleOCR pipeline detected 270-degree orientation and recovered the invoice text. See [local probe results](../eval/au/ocr-probe.json) and [Paddle probe](../eval/au/paddle-probe.json).
 
 The [PaddleOCR pipeline](https://github.com/PaddlePaddle/PaddleOCR/blob/main/paddleocr/_pipelines/ocr.py) supports document orientation and text-line orientation. These capabilities justify a narrow fallback here. PP-StructureV3 table extraction and document unwarping were not added because this pilot only classifies pages.
 
@@ -31,9 +43,11 @@ The production wrapper `scripts/extract-paddle.py` passes every model directory 
 
 ## Limits
 
-The bridges check file size before processing and reject PDFs above 50 MiB or 500 pages. The default bridge gets the page count from pdf-inspector before extraction. Before OCR, geometry preflight checks all relevant pages against 20 million rendered pixels and 10,000 pixels per side, at 150 dpi for the default engine and scale 2 for Paddle. No oversized page is silently downscaled. Paddle validates every selected page before rendering any of them. These bounds do not replace process-level memory isolation.
+The bridges check file size before processing and reject PDFs above 50 MiB or 500 pages. The default bridge gets the page count from pdf-inspector before extraction. Before OCR, geometry preflight checks all relevant pages against 20 million rendered pixels and 10,000 pixels per side, at 200 dpi for the default engine and scale 2 for Paddle. No oversized page is silently downscaled. Paddle validates every selected page before rendering any of them. These bounds do not replace process-level memory isolation.
 
 The comparison used one clean, one lightly skewed and one sideways synthetic invoice. It does not cover handwriting, severe blur, warped photographs, complex tables or all issuer layouts. Paddle lines below 0.8 confidence are excluded from classification evidence. Reliable remaining lines can support a suggestion, with the warning retained. Missing or malformed confidence data fails closed. Every suggestion still requires review; partially trusted OCR text is not sent to a model.
+
+Paddle keeps scale 2 (144 dpi). On the same 33 benchmark pages (8 October 2026, Windows CPU), it read 99.98% of characters and 99.78% of number fields at scale 2, including the sideways pages. At 200 dpi the 6 pt and 8 pt pages gained the few missing fields, but the noisy JPEG page fell to 92% of characters, and to 78% at 300 dpi. Mean time per page rose from 6.0 s to 8.1 s and 14.0 s.
 
 The fallback has a 120-second process timeout, shared across a batch. Pages remain flagged if it cannot complete. The library batch API accepts up to 50 documents and 500 selected pages, reuses the loaded models, preserves document order and isolates individual extraction failures. A process failure flags every selected page. No hosted fallback is implemented.
 

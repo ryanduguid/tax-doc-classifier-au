@@ -1,12 +1,12 @@
 {
-  "engine": "pdf-inspector 1.19.0 / PP-OCRv6 Small / ONNX Runtime 1.27.0",
+  "engine": "pdf-inspector 1.25.2 / PP-OCRv6 Small / ONNX Runtime 1.27.0 / 200 dpi / review below 0.9",
   "platform": "win32",
   "syntheticOnly": true,
   "headToHeadPaddleBenchmark": false,
   "results": [
     {
       "file": "scan.pdf",
-      "elapsedMs": 660,
+      "elapsedMs": 2021,
       "pages": [
         {
           "page": 1,
@@ -19,12 +19,12 @@
     },
     {
       "file": "scan-skewed.pdf",
-      "elapsedMs": 669,
+      "elapsedMs": 1998,
       "pages": [
         {
           "page": 1,
           "extraction": "ocr",
-          "textCharacters": 88,
+          "textCharacters": 84,
           "documentType": "tax-invoice",
           "warnings": []
         }
@@ -32,13 +32,13 @@
     },
     {
       "file": "scan-sideways.pdf",
-      "elapsedMs": 626,
+      "elapsedMs": 2082,
       "pages": [
         {
           "page": 1,
-          "extraction": "ocr",
-          "textCharacters": 53,
-          "documentType": "unknown",
+          "extraction": "needs_ocr",
+          "textCharacters": 46,
+          "documentType": "unreadable",
           "warnings": []
         }
       ]

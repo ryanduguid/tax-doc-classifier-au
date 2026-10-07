@@ -54,7 +54,7 @@ pnpm classify:au document.pdf --python /path/to/python --ocr
 
 Set `PDFIUM_LIB_PATH`, `ORT_DYLIB_PATH` and `PDF_INSPECTOR_MODEL_CACHE` as needed. Windows accepts the existing environment's full Python executable path. The bridge always uses `offline=True`: missing models cause an error rather than downloads or uploads.
 
-The limits are 50 MiB per input, 500 PDF pages, 200,000 extracted characters per page and 120 seconds per PDF extraction. File size and page count are checked before text extraction or OCR. Before OCR, every relevant page must fit within 20 million rendered pixels and 10,000 pixels on either side. Oversized pages are refused rather than silently downscaled. The default bridge uses 150 dpi; Paddle uses scale 2.
+The limits are 50 MiB per input, 500 PDF pages, 200,000 extracted characters per page and 120 seconds per PDF extraction. File size and page count are checked before text extraction or OCR. Before OCR, every relevant page must fit within 20 million rendered pixels and 10,000 pixels on either side. Oversized pages are refused rather than silently downscaled. The default bridge uses 200 dpi (see [OCR setup](docs/ocr-setup.md)); Paddle uses scale 2.
 
 pdf-inspector handles classification and extraction. Its API does not expose page dimensions, so pypdfium2 5.13.0 supplies the geometry preflight only. Install the updated requirements even if you already have an older PDF environment. These checks bound the requested OCR images; they are not an operating-system memory sandbox.
 

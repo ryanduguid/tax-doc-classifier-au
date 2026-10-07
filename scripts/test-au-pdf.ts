@@ -22,6 +22,17 @@ const ocr = await readAuPages(path('scan.pdf'), { python, ocr: true })
 assert.equal(ocr[0].extraction, 'ocr')
 assert.equal(classifyAuRules(ocr[0]).documentType, 'tax-invoice')
 assert.equal(classifyAuRules(ocr[0]).requiresReview, true)
+// Sideways OCR scores below the 0.9 review threshold, so its garbled text is never classified.
+const sideways = await readAuPages(path('scan-sideways.pdf'), { python, ocr: true })
+assert.equal(sideways[0].extraction, 'needs_ocr')
+assert.equal(classifyAuRules(sideways[0]).documentType, 'unreadable')
+// 5 pt rows (scripts/make-au-pdf-fixtures.py); 150 dpi rendering dropped 6 to 8 of them at full confidence.
+const smallPrint = await readAuPages(path('scan-small-print.pdf'), { python, ocr: true })
+const smallText = smallPrint[0].text.replace(/\s/g, '')
+const missingRows = Array.from({ length: 30 }, (_, i) => i + 1)
+  .map(day => `${String(day).padStart(2, '0')}/09/2026Cardpurchase${day * 7919 % 9000 + 100}.${String(day * 37 % 100).padStart(2, '0')}`)
+  .filter(row => !smallText.includes(row))
+assert.deepEqual(missingRows, [])
 const empty = await readAuPages(path('empty.pdf'), { python })
 assert.equal(classifyAuRules(empty[0]).documentType, 'unreadable')
 const { stdout } = await promisify(execFile)(process.execPath,
@@ -30,11 +41,9 @@ const manifest = JSON.parse(stdout)
 assert.equal(manifest.results.length, 3)
 assert.equal(manifest.summary.automaticallyFiled, 0)
 assert.ok(!stdout.includes('Example supplies'))
-console.log('PDF integration PASS: native pack, image-only refusal, offline OCR, empty page, built CLI, unchanged input and manifest privacy')
+console.log('PDF integration PASS: native pack, image-only refusal, offline OCR, sideways review, small print, empty page, built CLI, unchanged input and manifest privacy')
 
 if (process.argv[3] && process.argv[4]) {
-  const sideways = await readAuPages(path('scan-sideways.pdf'), { python, ocr: true })
-  assert.equal(classifyAuRules(sideways[0]).documentType, 'unknown')
   const fixed = await retryAuPagesWithPaddle(path('scan-sideways.pdf'), sideways,
     { python: process.argv[3], models: process.argv[4] })
   assert.equal(classifyAuRules(fixed[0]).documentType, 'tax-invoice')

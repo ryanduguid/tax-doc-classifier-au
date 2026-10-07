@@ -3,6 +3,12 @@ import json
 import sys
 from pdf_limits import check_file, check_page_count, check_geometry
 
+# Synthetic benchmark, 8 October 2026: 150 dpi lost 6 to 7% of characters on text of 8 pt or smaller;
+# 200 dpi recovered it. Good pages scored >= 0.98 confidence, sideways pages 0.59-0.69, which the
+# library's default 0.5 review threshold did not flag.
+OCR_DPI = 200
+REVIEW_BELOW_CONFIDENCE = 0.9
+
 
 def extract(path, ocr):
     import pdf_inspector
@@ -16,9 +22,10 @@ def extract(path, ocr):
         with pdfium.PdfDocument(path) as doc:
             if len(doc) != count:
                 raise ValueError("PDF page count changed during preflight")
-            check_geometry(doc, list(range(1, count + 1)), 150 / 72)
+            check_geometry(doc, list(range(1, count + 1)), OCR_DPI / 72)
     if ocr:
-        result = pdf_inspector.process_pdf_with_ocr(path, offline=True, dpi=150)
+        result = pdf_inspector.process_pdf_with_ocr(path, offline=True, dpi=OCR_DPI,
+                                                    hosted_recommendation_confidence=REVIEW_BELOW_CONFIDENCE)
         return [{"page": p.page_number, "text": p.markdown,
                  "extraction": "needs_ocr" if p.provenance.hosted_recommended else
                  ("native" if p.provenance.source == "native" else "ocr"),

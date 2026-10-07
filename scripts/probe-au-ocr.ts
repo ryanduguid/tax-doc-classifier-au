@@ -12,7 +12,7 @@ for (const file of ['scan.pdf', 'scan-skewed.pdf', 'scan-sideways.pdf']) {
       documentType: classifyAuRules(p).documentType, warnings: p.warnings ?? [] })) })
 }
 await writeFile(new URL('../eval/au/ocr-probe.json', import.meta.url), JSON.stringify({
-  engine: 'pdf-inspector 1.19.0 / PP-OCRv6 Small / ONNX Runtime 1.27.0',
+  engine: 'pdf-inspector 1.25.2 / PP-OCRv6 Small / ONNX Runtime 1.27.0 / 200 dpi / review below 0.9',
   platform: process.platform, syntheticOnly: true, headToHeadPaddleBenchmark: false, results,
 }, null, 2) + '\n')
 console.log(JSON.stringify(results, null, 2))
