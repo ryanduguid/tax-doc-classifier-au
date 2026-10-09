@@ -1,5 +1,10 @@
 # Australian tax document classifier
 
+**Fork status**
+
+[![Fork code quality](https://app.codacy.com/project/badge/Grade/85c9ab02e2614b2ab954f0d21cddcfd8?branch=main)](https://app.codacy.com/gh/ryanduguid/tax-doc-classifier-au/dashboard)
+[![Fork Checks](https://github.com/ryanduguid/tax-doc-classifier-au/actions/workflows/check.yml/badge.svg?branch=main)](https://github.com/ryanduguid/tax-doc-classifier-au/actions/workflows/check.yml)
+
 A local pilot for sorting Australian tax and accounting documents into reviewable categories. Forked from [kyotofin/tax-doc-classifier](https://github.com/kyotofin/tax-doc-classifier); modified for Australia on 22 September 2026.
 
 The default CLI runs locally. It does not upload documents, extract financial amounts, calculate tax, move files or approve classifications. Every result has `requiresReview: true`.
