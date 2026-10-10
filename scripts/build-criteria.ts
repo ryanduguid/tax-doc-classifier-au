@@ -69,7 +69,7 @@ async function mefIds(): Promise<string[]> {
   return ids
 }
 
-const ids = [...new Set([...(await mefIds()), ...INFO_RETURNS])].filter((id) => !NOT_ON_IRS_GOV.has(id)).sort()
+const ids = [...new Set([...(await mefIds()), ...INFO_RETURNS])].filter((id) => !NOT_ON_IRS_GOV.has(id)).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
 for (const id of ids) if (!isFormId(id)) throw new Error(`id violates grammar: ${id}`)
 console.log(`${ids.length} form ids`)
 
@@ -136,7 +136,7 @@ const TITLE_FIX: Record<string, string> = {
 for (const [id, t] of Object.entries(TITLE_FIX)) if (entries[id]) entries[id].title = t
 
 const sorted: Criteria = {}
-for (const id of Object.keys(entries).sort()) sorted[id] = entries[id]
+for (const id of Object.keys(entries).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))) sorted[id] = entries[id]
 await writeFile(join(root, 'data', 'criteria.json'), JSON.stringify(sorted, null, 1) + '\n')
 manifest.sort((a, b) => a.id.localeCompare(b.id))
 await writeFile(join(root, 'eval', 'manifest.json'), JSON.stringify(manifest, null, 1) + '\n')

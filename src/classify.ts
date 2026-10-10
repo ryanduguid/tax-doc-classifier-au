@@ -75,7 +75,7 @@ export function familyOf(id: string, criteria: Criteria): string {
 
 export function firstListCriteria(criteria: Criteria): Record<string, Criterion> {
   const out: Record<string, Criterion> = {}
-  for (const id of Object.keys(criteria).sort()) {
+  for (const id of Object.keys(criteria).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))) {
     const fam = familyOf(id, criteria)
     if (fam !== id) continue
     out[id] = (RARE_PARENTS as readonly string[]).includes(id) ? { what: FAMILY_WHAT[id] } : criterionFor(criteria[id])
@@ -87,7 +87,7 @@ export function firstListCriteria(criteria: Criteria): Record<string, Criterion>
 export function membersOf(parent: string, criteria: Criteria): string[] {
   return Object.keys(criteria)
     .filter((id) => id === parent || criteria[id].parent === parent)
-    .sort()
+    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
 }
 
 export type ClassifyOptions = {
