@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile, access } from 'node:fs/promises'
+import { mkdir, writeFile, access } from 'node:fs/promises'
 import { join } from 'node:path'
 import { unzipSync, strFromU8 } from 'fflate'
 import { irsPdfName, isFormId, labelOf, mefNameToId, parentOf } from '../src/ids.js'
