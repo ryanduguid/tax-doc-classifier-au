@@ -1,9 +1,12 @@
 # Australian tax document classifier
 
+<div align="center">
+
 **Fork status**
 
-[![Fork code quality](https://img.shields.io/codacy/grade/85c9ab02e2614b2ab954f0d21cddcfd8/main?style=flat&labelColor=000000)](https://app.codacy.com/gh/ryanduguid/tax-doc-classifier-au/dashboard)
-[![Fork Checks](https://img.shields.io/github/actions/workflow/status/ryanduguid/tax-doc-classifier-au/check.yml?branch=main&label=Checks&style=flat&labelColor=000000)](https://github.com/ryanduguid/tax-doc-classifier-au/actions/workflows/check.yml)
+[![Fork code quality](https://img.shields.io/codacy/grade/85c9ab02e2614b2ab954f0d21cddcfd8/main?style=flat&labelColor=000000)](https://app.codacy.com/gh/ryanduguid/tax-doc-classifier-au/dashboard) [![Fork Checks](https://img.shields.io/github/actions/workflow/status/ryanduguid/tax-doc-classifier-au/check.yml?branch=main&label=Checks&style=flat&labelColor=000000)](https://github.com/ryanduguid/tax-doc-classifier-au/actions/workflows/check.yml)
+
+</div>
 
 A local pilot for sorting Australian tax and accounting documents into reviewable categories. Forked from [kyotofin/tax-doc-classifier](https://github.com/kyotofin/tax-doc-classifier); modified for Australia on 22 September 2026.
 
