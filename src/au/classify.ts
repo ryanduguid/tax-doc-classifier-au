@@ -44,7 +44,7 @@ function orderedTokens(text: string, tokens: RegExp, pairs: [string, string][]):
 }
 // Rule matches are evidence, never calibrated probabilities or filing approvals.
 const RULES: Rule[] = [
-  { type: 'income-statement', heading: /\bincome statement\b/i, support: /tax ready|salary|gross|single touch payroll/i },
+  { type: 'income-statement', heading: /\bincome statement\b/i, support: /tax ready|salary|gross (?:payments|amount)|single touch payroll/i },
   { type: 'payment-summary', heading: /\bpayment summary\b/i, support: /PAYG|pay as you go|withheld|gross payments/i },
   { type: 'bank-statement', heading: /\b(bank statement|statement of account|(?:savings|transaction|bank) account statement)\b/i, support: /opening balance|closing balance|interest credited|withdrawals|deposits/i },
   { type: 'loan-statement', heading: /\b(?:(?:home )?loan|mortgage)(?: account)? statement\b/i, support: /interest|principal|repayment/i },
