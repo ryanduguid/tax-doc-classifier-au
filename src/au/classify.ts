@@ -56,7 +56,7 @@ const RULES: Rule[] = [
   { type: 'business-activity-statement', heading: /\b(?:business activity statement|activity statement|BAS)\b/i,
     support: text => orderedTokens(text, /\b(?:G1|1A|1B)\b/gi, [['g1', '1a'], ['1a', '1b']]) },
   { type: 'notice-of-assessment', heading: /\bnotice of (?:amended )?assessment\b/i, support: /taxable income|refund|amount payable|balance of this assessment/i },
-  { type: 'tax-return', heading: /\b(?:individual|company|trust|partnership|superannuation fund) tax return\b/i, support: /income|deductions|declaration|distribution/i },
+  { type: 'tax-return', heading: /\b(?:(?:individual|company|trust|partnership|superannuation fund|fund income) tax return|self-managed superannuation fund annual return)\b/i, support: /income|deductions|declaration|distribution/i },
   { type: 'tax-invoice', heading: /\btax invoice\b/i,
     support: text => orderedTokens(text, /\b(?:GST|total|balance)\b/gi, [['gst', 'total'], ['gst', 'balance'], ['total', 'gst']]) },
   // A receipt needs affirmative payment evidence; "not paid" contains "paid" and must not count.
