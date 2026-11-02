@@ -164,3 +164,16 @@ describe('Australian review contract', () => {
     expect(validatePages([invoice, { ...invoice, page: 4 }]).map(p => p.page)).toEqual([1, 4])
   })
 })
+
+describe('Australian document headings', () => {
+  it('recognises the ATO titles for super fund returns', () => {
+    for (const title of ['Fund income tax return 2026', 'Self-managed superannuation fund annual return 2026']) {
+      const page: AuPage = { page: 1, text: `${title}\nSection B: Income\nSection C: Deductions\nDeclaration`, extraction: 'native' }
+      expect(classifyAuRules(page).documentType).toBe('tax-return')
+    }
+  })
+  it('does not read a profit and loss statement as an employment income statement', () => {
+    const page: AuPage = { page: 1, text: 'Income Statement\nRevenue 500000\nCost of sales 200000\nGross profit 300000', extraction: 'native' }
+    expect(classifyAuRules(page).documentType).toBe('unknown')
+  })
+})

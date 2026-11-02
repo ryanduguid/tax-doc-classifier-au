@@ -44,7 +44,7 @@ function orderedTokens(text: string, tokens: RegExp, pairs: [string, string][]):
 }
 // Rule matches are evidence, never calibrated probabilities or filing approvals.
 const RULES: Rule[] = [
-  { type: 'income-statement', heading: /\bincome statement\b/i, support: /tax ready|salary|gross|single touch payroll/i },
+  { type: 'income-statement', heading: /\bincome statement\b/i, support: /tax ready|salary|gross (?:payments|amount)|single touch payroll/i },
   { type: 'payment-summary', heading: /\bpayment summary\b/i, support: /PAYG|pay as you go|withheld|gross payments/i },
   { type: 'bank-statement', heading: /\b(bank statement|statement of account|(?:savings|transaction|bank) account statement)\b/i, support: /opening balance|closing balance|interest credited|withdrawals|deposits/i },
   { type: 'loan-statement', heading: /\b(?:(?:home )?loan|mortgage)(?: account)? statement\b/i, support: /interest|principal|repayment/i },
@@ -56,7 +56,7 @@ const RULES: Rule[] = [
   { type: 'business-activity-statement', heading: /\b(?:business activity statement|activity statement|BAS)\b/i,
     support: text => orderedTokens(text, /\b(?:G1|1A|1B)\b/gi, [['g1', '1a'], ['1a', '1b']]) },
   { type: 'notice-of-assessment', heading: /\bnotice of (?:amended )?assessment\b/i, support: /taxable income|refund|amount payable|balance of this assessment/i },
-  { type: 'tax-return', heading: /\b(?:individual|company|trust|partnership|superannuation fund) tax return\b/i, support: /income|deductions|declaration|distribution/i },
+  { type: 'tax-return', heading: /\b(?:(?:individual|company|trust|partnership|superannuation fund|fund income) tax return|self-managed superannuation fund annual return)\b/i, support: /income|deductions|declaration|distribution/i },
   { type: 'tax-invoice', heading: /\btax invoice\b/i,
     support: text => orderedTokens(text, /\b(?:GST|total|balance)\b/gi, [['gst', 'total'], ['gst', 'balance'], ['total', 'gst']]) },
   // A receipt needs affirmative payment evidence; "not paid" contains "paid" and must not count.
