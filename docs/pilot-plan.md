@@ -1,6 +1,6 @@
 # Australian pilot
 
-Scope agreed on 22 September 2026: fork the classifier, compare alternative repositories, implement Australian document categories, and evaluate a local pilot. Use public or synthetic data. No client uploads or paid inference runs.
+The tax-doc-classifier-au pilot scope, agreed on 22 September 2026, was to fork [kyotofin/tax-doc-classifier](https://github.com/kyotofin/tax-doc-classifier), compare alternative repositories, implement Australian document categories and evaluate a local pilot. Use public or synthetic data. No client uploads or paid inference runs.
 
 ## Acceptance checks
 

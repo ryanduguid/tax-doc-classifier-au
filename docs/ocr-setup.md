@@ -1,5 +1,7 @@
 # Local OCR setup
 
+tax-doc-classifier-au, the Australian fork of [kyotofin/tax-doc-classifier](https://github.com/kyotofin/tax-doc-classifier), adds an offline PDF and OCR bridge; this page is for people setting up that runtime locally.
+
 ## Default runtime
 
 The PDF bridge uses pdf-inspector 1.25.2 for classification and extraction. Install requirements-pdf.txt in a dedicated environment, including pypdfium2 5.13.0 for the page-dimension check that pdf-inspector's API does not expose. Offline OCR also requires the configured PDFium library, ONNX Runtime and cached PP-OCRv6 Small models, as documented in [pdf-inspector's runtime guide](https://github.com/firecrawl/pdf-inspector/blob/main/docs/ocr-runtime.md).

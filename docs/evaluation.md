@@ -1,6 +1,6 @@
 # Pilot evaluation
 
-These are synthetic development and integration results, first measured locally on Windows on 22 September 2026. The rules table was rechecked on 5 October 2026; model and OCR measurements retain their dates below. No client documents or paid classification API calls were used.
+The tax-doc-classifier-au pilot evaluation, for reviewers of this Australian fork of [kyotofin/tax-doc-classifier](https://github.com/kyotofin/tax-doc-classifier), reports synthetic development and integration results, first measured locally on Windows on 22 September 2026. The rules table was rechecked on 5 October 2026; model and OCR measurements retain their dates below. No client documents or paid classification API calls were used.
 
 ## Classification
 
