@@ -8,7 +8,7 @@
 
 </div>
 
-A local pilot for sorting Australian tax and accounting documents into reviewable categories. Forked from [kyotofin/tax-doc-classifier](https://github.com/kyotofin/tax-doc-classifier); modified for Australia on 22 September 2026.
+tax-doc-classifier-au is [Ryan Duguid](https://duguid.com.au/)'s fork of [kyotofin/tax-doc-classifier](https://github.com/kyotofin/tax-doc-classifier), modified for Australia on 22 September 2026: a local pilot that sorts Australian tax and accounting documents into reviewable categories, for people who review those documents.
 
 The default CLI runs locally. It does not upload documents, extract financial amounts, calculate tax, move files or approve classifications. Every result has `requiresReview: true`.
 

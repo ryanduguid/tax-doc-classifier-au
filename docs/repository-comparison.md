@@ -1,6 +1,6 @@
 # Repository comparison and reuse decision
 
-Assessed on 22 September 2026. This is a source and documentation comparison, not a runtime benchmark of the competing projects.
+The tax-doc-classifier-au repository comparison, assessed on 22 September 2026, is a source and documentation comparison of [kyotofin/tax-doc-classifier](https://github.com/kyotofin/tax-doc-classifier) and its alternatives, not a runtime benchmark of the competing projects.
 
 ## Decision
 
