@@ -20,7 +20,10 @@ async function review(paths: string[]) {
   const manifestSha256 = createHash('sha256').update(raw).digest('hex')
   let manifest, decisions
   try { manifest = validateManifest(json(raw)) } catch (err) { throw new UsageError((err as Error).message) }
-  if (!paths[1]) return console.log(JSON.stringify(decisionTemplate(manifest, manifestSha256), null, 2))
+  if (!paths[1]) {
+    console.log(JSON.stringify(decisionTemplate(manifest, manifestSha256), null, 2))
+    return
+  }
   try {
     decisions = validateDecisions(json(await readFile(paths[1], 'utf8')))
     console.log(JSON.stringify(summariseReview(manifest, decisions, manifestSha256), null, 2))

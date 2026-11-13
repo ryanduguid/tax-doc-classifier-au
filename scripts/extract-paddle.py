@@ -87,7 +87,7 @@ def extract_batch(jobs, model_root):
         if not isinstance(job, dict) or not isinstance(job.get("file"), str) or not isinstance(job.get("pages"), list):
             raise ValueError("Invalid batch request")
         pages = job["pages"]
-        if not pages or any(type(n) is not int or n < 1 for n in pages) or pages != sorted(set(pages)):
+        if not pages or any(not isinstance(n, int) or isinstance(n, bool) or n < 1 for n in pages) or pages != sorted(set(pages)):
             raise ValueError("Invalid batch pages")
         total += len(pages)
     if total > 500:

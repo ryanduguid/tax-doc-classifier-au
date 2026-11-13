@@ -15,7 +15,7 @@ def check_file(path):
 
 
 def check_page_count(count):
-    if type(count) is not int or not 1 <= count <= MAX_PAGES:
+    if not isinstance(count, int) or isinstance(count, bool) or not 1 <= count <= MAX_PAGES:
         raise ValueError("PDF input must contain between 1 and 500 pages")
 
 
@@ -29,7 +29,7 @@ def check_render_size(width, height, scale):
 
 def check_geometry(doc, pages, scale):
     check_page_count(len(doc))
-    if not pages or len(pages) > MAX_PAGES or any(type(n) is not int or not 1 <= n <= len(doc) for n in pages):
+    if not pages or len(pages) > MAX_PAGES or any(not isinstance(n, int) or isinstance(n, bool) or not 1 <= n <= len(doc) for n in pages):
         raise ValueError("Invalid selected PDF pages")
     if pages != sorted(set(pages)):
         raise ValueError("Selected PDF pages must be unique and increasing")

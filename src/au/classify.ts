@@ -61,7 +61,7 @@ const RULES: Rule[] = [
     support: text => orderedTokens(text, /\b(?:GST|total|balance)\b/gi, [['gst', 'total'], ['gst', 'balance'], ['total', 'gst']]) },
   // A receipt needs affirmative payment evidence; "not paid" contains "paid" and must not count.
   { type: 'receipt', heading: /\b(?:payment |sales )?receipt\b/i,
-    support: text => !/\b(?:not|never)\s+(?:yet\s+)?(?:been\s+)?paid\b|\bpayment\s+(?:not|never)\s+(?:yet\s+)?received\b|\bunpaid\b|\bawaiting payment\b/i.test(text) &&
+    support: text => !/\b(?:not|never)\s+(?:paid|yet\s+paid|been\s+paid|yet\s+been\s+paid)\b|\bpayment\s+(?:not|never)\s+(?:received|yet\s+received)\b|\bunpaid\b|\bawaiting payment\b/i.test(text) &&
       /\b(?:paid|payment received|payment method)\b/i.test(text) },
   { type: 'private-health-statement', heading: /\b(?:private health insurance(?: tax)? statement|annual private health statement)\b/i, support: /rebate|benefit code|tax claim code/i },
 ]
@@ -177,7 +177,7 @@ export async function classifyAuPage(page: AuPage, opts: AuOptions = {}): Promis
       return { ...local, documentType: fallback, method: 'model', reason: 'model_input_truncated', calls: 1, inputTokens: response.inputTokens }
     }
     const candidate = AU_TYPES.includes(answer.choice as AuDocumentType) ? answer.choice as AuDocumentType : null
-    const disagreement = candidate && local.candidates.length > 0 && !local.candidates.includes(candidate)
+    const disagreement = candidate !== null && local.candidates.length > 0 && !local.candidates.includes(candidate)
     const tied = Object.values(answer.probabilities).filter(p => p === answer.probabilities[answer.choice]).length > 1
     return { ...local, method: 'model', calls: 1, inputTokens: response.inputTokens, confidence: answer.confidence,
       documentType: tied || disagreement || local.documentType === 'ambiguous' ? 'ambiguous' :
