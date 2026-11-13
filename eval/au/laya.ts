@@ -47,10 +47,15 @@ const backend: Backend = { ask(state, questions) {
 } }
 
 const named = (outcome: AuOutcome) => AU_TYPES.includes(outcome as typeof AU_TYPES[number])
+// Every evaluated row has an outcome under each policy.
+function of(m: Map<string, AuOutcome>, row: Case): AuOutcome {
+  const outcome = m.get(row.id)
+  if (outcome === undefined) throw new Error(`No outcome recorded for ${row.id}`)
+  return outcome
+}
 // How a policy changed the rules-only outcome, judged against the truth label.
 function transitions(cases: Case[], rules: Map<string, AuOutcome>, policy: Map<string, AuOutcome>) {
   const count = (test: (row: Case) => boolean) => cases.filter(test).length
-  const of = (m: Map<string, AuOutcome>, row: Case) => m.get(row.id)!
   return {
     retained: count(row => of(policy, row) === of(rules, row)),
     recovered: count(row => of(rules, row) !== row.label && of(policy, row) === row.label),
@@ -75,10 +80,10 @@ for (const name of FILES) {
     }
   }
   const settled = await Promise.all(datasets[name].filter(row => requests.has(row.id))
-    .map(async row => ({ row, result: await requests.get(row.id)!.then(r => r, () => null) })))
+    .map(async row => ({ row, result: await requests.get(row.id)?.then(r => r, () => null) })))
   const failed = settled.filter(s => !s.result).map(s => s.row.id)
   const invalid = settled.filter(s => s.result && !validAnswer(s.result.answers.document)).map(s => s.row.id)
-  const valid = settled.filter((s): s is { row: Case; result: AskResult } => Boolean(s.result) && validAnswer(s.result!.answers.document))
+  const valid = settled.filter((s): s is { row: Case; result: AskResult } => Boolean(s.result && validAnswer(s.result.answers.document)))
   const answer = (s: { result: AskResult }) => s.result.answers.document
   const correct = valid.filter(s => answer(s).choice === s.row.label), wrong = valid.filter(s => answer(s).choice !== s.row.label)
   const modelOnly = { pagesSent: settled.length, failed, invalid, valid: valid.length, correct: correct.length,
@@ -89,8 +94,8 @@ for (const name of FILES) {
     meanConfidenceWrong: mean(wrong.map(s => answer(s).confidence)),
     truncated: valid.filter(s => s.result.truncated).length,
     errors: wrong.map(s => ({ id: s.row.id, truth: s.row.label, choice: answer(s).choice, confidence: answer(s).confidence })) }
-  const compare = { ...evaluate(datasets[name], row => outcomes.compare.get(row.id)!), transitions: transitions(datasets[name], rules, outcomes.compare) }
-  const uncertain = { ...evaluate(datasets[name], row => outcomes.uncertain.get(row.id)!), transitions: transitions(datasets[name], rules, outcomes.uncertain) }
+  const compare = { ...evaluate(datasets[name], row => of(outcomes.compare, row)), transitions: transitions(datasets[name], rules, outcomes.compare) }
+  const uncertain = { ...evaluate(datasets[name], row => of(outcomes.uncertain, row)), transitions: transitions(datasets[name], rules, outcomes.uncertain) }
   results[name] = { compare, uncertain, modelOnly }
   console.log(`${name}: model ${modelOnly.correct}/${modelOnly.valid} valid answers right (${modelOnly.wrongAtGate} wrong at or above the gate, ` +
     `${failed.length} failed, ${invalid.length} invalid); pipeline compare ${compare.correct}/${compare.cases}, uncertain ${uncertain.correct}/${uncertain.cases} ` +

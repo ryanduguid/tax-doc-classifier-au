@@ -9,8 +9,9 @@ function answer(choice = 'tax-invoice', confidence = 0.98): ChoiceAnswer {
   const keys = [...AU_TYPES, 'unknown', 'ambiguous']
   return { choice, confidence, probabilities: Object.fromEntries(keys.map(k => [k, k === choice ? confidence : (1 - confidence) / (keys.length - 1)])) }
 }
-function backend(a: unknown): Backend {
-  return { ask: vi.fn(async () => ({ answers: { document: a as ChoiceAnswer }, inputTokens: 100 })) }
+// The mock is a property, not a Backend method, so tests can read its calls.
+function backend(a: unknown) {
+  return { ask: vi.fn(() => Promise.resolve({ answers: { document: a as ChoiceAnswer }, inputTokens: 100 })) }
 }
 const authorised = (b: Backend) => ({ backend: b, allowModelProcessing: true })
 
@@ -87,14 +88,14 @@ describe('Australian review contract', () => {
   })
   it('keeps the rules\' ambiguity when the model step fails', async () => {
     const combined = { ...invoice, text: invoice.text + '\nPayment receipt\nPaid by card' }
-    const failing: Backend = { ask: async () => { throw new Error('down') } }
+    const failing: Backend = { ask: () => Promise.reject(new Error('down')) }
     expect(await classifyAuPage(combined, authorised(failing))).toMatchObject({ documentType: 'ambiguous', reason: 'model_unavailable', candidates: ['tax-invoice', 'receipt'] })
     expect(await classifyAuPage(combined, authorised(backend({})))).toMatchObject({ documentType: 'ambiguous', reason: 'invalid_model_response' })
     expect(await classifyAuPage({ ...combined, text: combined.text + '\n' + 'x'.repeat(20_001) }, authorised(backend(answer()))))
       .toMatchObject({ documentType: 'ambiguous', reason: 'model_input_too_long', calls: 0 })
   })
   it('abstains when the provider cut the page to its context limit', async () => {
-    const b: Backend = { ask: async () => ({ answers: { document: answer() }, inputTokens: 1024, truncated: true }) }
+    const b: Backend = { ask: () => Promise.resolve({ answers: { document: answer() }, inputTokens: 1024, truncated: true }) }
     expect(await classifyAuPage(invoice, authorised(b))).toMatchObject({ documentType: 'unknown', reason: 'model_input_truncated', calls: 1, inputTokens: 1024 })
   })
   it.each(['Receipt\nNOT PAID\nTotal 110', 'Receipt\nNot yet paid\nPayment method: card', 'Receipt\nPayment not received\nTotal 110'])('does not treat negated payment as receipt evidence', text => {
@@ -136,7 +137,7 @@ describe('Australian review contract', () => {
       .toMatchObject({ documentType: 'unknown', reason: 'invalid_model_response' })
   })
   it('does not echo provider errors', async () => {
-    const b: Backend = { ask: async () => { throw new Error('SYNTHETIC_PRIVATE_MARKER') } }
+    const b: Backend = { ask: () => Promise.reject(new Error('SYNTHETIC_PRIVATE_MARKER')) }
     const r = await classifyAuPage(invoice, authorised(b))
     expect(r.reason).toBe('model_unavailable')
     expect(JSON.stringify(r)).not.toContain('SYNTHETIC_PRIVATE_MARKER')

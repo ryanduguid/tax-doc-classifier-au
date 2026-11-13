@@ -33,7 +33,7 @@ export async function retryAuDocumentsWithPaddle(documents: { file: string; page
     const pending = run(opts.python, ['-X', 'utf8', script, '--batch', resolve(opts.models)],
       { timeout: 120_000, maxBuffer: 32 * 1024 * 1024, windowsHide: true })
     // execFile reports process errors through pending; a closed stdin must not escape as an unhandled event.
-    pending.child.stdin?.on('error', () => {})
+    pending.child.stdin?.on('error', () => undefined)
     pending.child.stdin?.end(JSON.stringify(jobs.map(({ file, pages }) => ({ file, pages }))))
     const { stdout } = await pending
     const response: unknown = JSON.parse(stdout)
@@ -47,7 +47,7 @@ export async function retryAuDocumentsWithPaddle(documents: { file: string; page
       } catch { failed(job.index, job.pages) }
     })
   } catch {
-    jobs.forEach(job => failed(job.index, job.pages))
+    for (const job of jobs) failed(job.index, job.pages)
   }
   return output
 }

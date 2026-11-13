@@ -10,6 +10,8 @@ export type ReviewDecisions = { schemaVersion: 'au-review-decisions-1'; manifest
 const OUTCOMES: AuOutcome[] = [...AU_TYPES, 'unknown', 'ambiguous', 'unreadable']
 const METHODS = ['rules', 'model', 'extraction'] as const
 const named = (outcome: AuOutcome) => AU_TYPES.includes(outcome as AuDocumentType)
+// The template's empty strings mean not yet filled in.
+const filled = (value: string | undefined) => value === undefined || value === '' ? null : value
 const sha256 = /^[a-f0-9]{64}$/
 // Reasons are fixed identifiers; anything else could be text or a path from an edited manifest.
 const identifier = /^[a-z_]{1,64}$/
@@ -86,8 +88,8 @@ export function summariseReview(manifest: ReviewManifest, decisions: ReviewDecis
     schema: 'au-review-summary-1',
     manifestSha256,
     taxonomyVersion: AU_TAXONOMY_VERSION,
-    reviewer: decisions.reviewer || null,
-    reviewedAt: decisions.reviewedAt || null,
+    reviewer: filled(decisions.reviewer),
+    reviewedAt: filled(decisions.reviewedAt),
     // The reviewer saw each suggestion while deciding, so acceptance is agreement, not independent truth.
     suggestionsVisible: true,
     pages: manifest.results.length,
