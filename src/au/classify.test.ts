@@ -184,15 +184,27 @@ describe('Australian document headings', () => {
     ['Income statement\nEmployer ABN\nSalary and wages 80000', 'income-statement'],
     ['Income statement\nEmployer\nABN: 00 000 000 000\nSalary and wages 80000', 'income-statement'],
     ['Income statement\nEmployer: Example Services\nSalary and wages 80000', 'income-statement'],
+    ['Income statement\nEmployer\nExample Services\nABN: 00 000 000 000\nSalary and wages 80000', 'income-statement'],
     ['Employment income statement\nSalary and wages 80000', 'income-statement'],
     ['Tax invoice\nGST 10.00\nAmount due 110.00', 'tax-invoice'],
     ['Tax invoice\nAmount payable 110.00\nGST 10.00', 'tax-invoice'],
     ['Tax invoice\nGST 10.00\nAmount due:\nAUD $110.00', 'tax-invoice'],
+    ['Tax invoice\nGST 10.00\nAmount due 110.00 AUD', 'tax-invoice'],
+    ['Tax invoice\nGST 10.00\nAmount due\nAmount payable 110.00', 'tax-invoice'],
     ['Tax invoice\nGST applies\nAmount due on delivery', 'unknown'],
     ['Tax invoice\nGST applies\nAmount due 30 days', 'unknown'],
+    ['Tax invoice\nGST applies\nAmount due 30\ndays', 'unknown'],
+    ['Tax invoice\nGST applies\nAmount due', 'unknown'],
     ['Tax invoice\nAmount due 110.00', 'unknown'],
     ['Quote\nGST 10.00\nAmount due 110.00', 'unknown'],
   ])('applies heading and supporting evidence to %s', (text, expected) => {
     expect(classifyAuRules({ page: 1, text, extraction: 'native' }).documentType).toBe(expected)
+  })
+
+  it('keeps competing employment and invoice evidence for human review', () => {
+    const text = 'Employment income statement\nSalary and wages 80000\nTax invoice\nGST 10.00\nAmount due 110.00 AUD'
+    expect(classifyAuRules({ page: 1, text, extraction: 'native' })).toMatchObject({
+      documentType: 'ambiguous', candidates: ['income-statement', 'tax-invoice'], requiresReview: true,
+    })
   })
 })

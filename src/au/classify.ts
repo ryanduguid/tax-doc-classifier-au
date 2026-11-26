@@ -47,7 +47,23 @@ function employmentIncomeEvidence(text: string, heading: string): boolean {
   if (/\btax[\s-]+ready\b|\bsingle\s+touch\s+payroll\b|\bgross\s+payments\b/i.test(text)) return true
   if (!/\b(?:salary|gross\s+amount)\b/i.test(text)) return false
   return /\bemployment\s+income statement\b/i.test(heading) ||
-    /\b(?:ATO\s+online\s+services|tax\s+withheld|PAYG\s+withholding|employer\s+(?:name|ABN))\b|\bemployer\s*:/i.test(text)
+    /\b(?:ATO\s+online\s+services|tax\s+withheld|PAYG\s+withholding|employer\s+(?:name|ABN))\b/i.test(text) ||
+    /^[ \t]*employer[ \t]*(?::[ \t]*|\n[ \t]*)\S/im.test(text)
+}
+
+function taxInvoiceEvidence(text: string): boolean {
+  if (orderedTokens(text, /\b(?:GST|total|balance)\b/gi, [['gst', 'total'], ['gst', 'balance'], ['total', 'gst']])) return true
+  if (!/\bGST\b/i.test(text)) return false
+  for (const label of text.matchAll(/\bamount\s+(?:due|payable)\b/gi)) {
+    const following = text.slice(label.index + label[0].length)
+    const amount = /^[\s:]*((?:AUD[ \t]*)?(?:A?\$[ \t]*)?\d+(?:,\d{3})*(?:\.\d{1,2})?(?:[ \t]+AUD)?)[ \t]*(?=\n|$)/i.exec(following)
+    if (!amount) continue
+    // A bare integer can be the first line of a payment term such as '30\nbusiness days'.
+    const continuation = following.slice(amount[0].length)
+    if (/^[\d,]+$/.test(amount[1]) && /^\s*(?:(?:business|working|calendar)\s+)?(?:days?|weeks?|months?|hours?)\b/i.test(continuation)) continue
+    return true
+  }
+  return false
 }
 
 // Rule matches are evidence, never calibrated probabilities or filing approvals.
@@ -65,9 +81,7 @@ const RULES: Rule[] = [
     support: text => orderedTokens(text, /\b(?:G1|1A|1B)\b/gi, [['g1', '1a'], ['1a', '1b']]) },
   { type: 'notice-of-assessment', heading: /\bnotice of (?:amended )?assessment\b/i, support: /taxable income|refund|amount payable|balance of this assessment/i },
   { type: 'tax-return', heading: /\b(?:(?:individual|company|trust|partnership|superannuation fund|fund income) tax return|self-managed superannuation fund annual return)\b/i, support: /income|deductions|declaration|distribution/i },
-  { type: 'tax-invoice', heading: /\btax invoice\b/i,
-    support: text => orderedTokens(text, /\b(?:GST|total|balance)\b/gi, [['gst', 'total'], ['gst', 'balance'], ['total', 'gst']]) ||
-      (/\bGST\b/i.test(text) && /\bamount\s+(?:due|payable)\b[\s:]*(?:AUD[ \t]*)?(?:A?\$[ \t]*)?\d[\d,]*(?:\.\d{2})?[ \t]*$/im.test(text)) },
+  { type: 'tax-invoice', heading: /\btax invoice\b/i, support: taxInvoiceEvidence },
   // A receipt needs affirmative payment evidence; "not paid" contains "paid" and must not count.
   { type: 'receipt', heading: /\b(?:payment |sales )?receipt\b/i,
     support: text => !/\b(?:not|never)\s+(?:paid|yet\s+paid|been\s+paid|yet\s+been\s+paid)\b|\bpayment\s+(?:not|never)\s+(?:received|yet\s+received)\b|\bunpaid\b|\bawaiting payment\b/i.test(text) &&
