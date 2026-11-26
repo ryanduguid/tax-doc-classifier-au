@@ -68,6 +68,7 @@ function taxInvoiceEvidence(text: string): boolean {
     const unit = /^(?:(?:business|working|calendar)\s+)?(?:days?|weeks?|months?|hours?|minutes?|years?)\b/i.exec(following)
     if (!unit) return true
     const suffix = following.slice(unit[0].length).split('\n', 1)[0].trimStart()
+    if (/^\p{Ps}.*\p{Pe}[ \t]*[:=][ \t]*[-+]?\d+(?:[.,]\d+)?[ \t]*$/u.test(suffix)) return true
     if (/[:=\d]/.test(suffix) && !/^[\s\p{Ps}]*(?:from|after|before|following|of|to|until|within|net)\b/iu.test(suffix)) return true
   }
   return false
