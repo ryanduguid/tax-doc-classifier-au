@@ -32,7 +32,7 @@ const TITLE_BOILERPLATE =
   /(Department of the Treasury|Internal Revenue Service|OMB No\.? ?\d{4}-\d{4}|Go to www\.irs\.gov\S*|www\.irs\.gov\S*|Attach to .*?\.|▶|►|VOID|CORRECTED|\(if checked\)|Cat\. No\. \S+|For Privacy Act.*|\b(19|20)\d\d\b|\d{4,5})/g
 const BOX_RE = /(?<![\w$,.\-/])(\d{1,2}[a-z]?)\s{1,4}([A-Z][^\n]{4,70}?)(?=\s{3,}|$)/g
 
-const root = new URL('..', import.meta.url).pathname
+const root = join(import.meta.dirname, '..')
 const corpus = join(root, 'eval', 'corpus', 'blank')
 await mkdir(corpus, { recursive: true })
 

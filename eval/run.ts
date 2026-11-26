@@ -20,7 +20,7 @@ const args = Object.fromEntries(process.argv.slice(2).map((a) => a.replace(/^--/
 const corpus = args.corpus ?? 'blank'
 const gate = Number(args.gate ?? 0.95)
 const concurrency = Number(args.concurrency ?? 12)
-const root = new URL('.', import.meta.url).pathname
+const root = import.meta.dirname
 const criteria = JSON.parse(await readFile(join(root, '..', 'data', 'criteria.json'), 'utf8')) as Criteria
 
 const BENCH_MAP: Record<string, string> = {
