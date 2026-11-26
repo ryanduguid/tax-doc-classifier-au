@@ -61,13 +61,15 @@ function employmentIncomeEvidence(text: string, heading: string): boolean {
 const FIELD_CLOSERS: Record<string, string> = { '[': ']', '{': '}', '\u298d': '\u2990', '\u298f': '\u298e' }
 // The Unicode 18 pair U+2E62/U+2E63 also occurs on Node versions with older Unicode tables.
 const FIELD_OPEN = /(?=\p{Bidi_Mirrored})\p{Ps}|\u2e62/u
+const MONTH_NAME = /^(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b\.?/i
 
 function isTimeQuantityField(suffix: string): boolean {
-  // Without a delimiter only a bare quantity or a conventional time label identifies a numeric cell.
-  const value = /(?:^|[:=][ \t]*|^(?:worked|billed|charged|logged|spent|outstanding)[ \t]+)[-+]?\d+(?:[.,]\d+)?[ \t]*$/i.exec(suffix)
+  const value = /(?:^|[:=][ \t]*|[ \t])[-+]?\d+(?:[.,]\d+)?[ \t]*$/.exec(suffix)
   if (!value) return false
   const label = suffix.slice(0, value.index).trimEnd()
-  if (/^(?:from|after|before|following|of|to|until|within|net)\b/i.test(label)) return false
+  if (/^(?:from|after|before|following|of|to|until|within|net|starting|ending|beginning|commencing)\b/i.test(label)) return false
+  // A single descriptor can identify an unpunctuated table cell such as "Hours payable 2".
+  if (/^[ \t]/.test(value[0]) && (!/^[\p{L}\p{M}\p{Pd}'’]+$/u.test(label) || MONTH_NAME.test(label))) return false
   const annotation = label.replace(/^[\p{L}\p{M}\p{Pd}'’/& \t]*/u, '')
   if (!annotation) return true
   if (!FIELD_OPEN.test(annotation.charAt(0))) return false
@@ -89,8 +91,9 @@ function continuesDate(value: string, following: string): boolean {
   if (/^\d{4}$/.test(value)) return /^([./-])(?:0?[1-9]|1[0-2])\1(?:0?[1-9]|[12]\d|3[01])\b/.test(following)
   if (/^(?:0?[1-9]|[12]\d|3[01])\.(?:0?[1-9]|1[0-2])$/.test(value)) return /^\.\d{2}(?:\d{2})?\b/.test(following)
   if (!/^(?:0?[1-9]|[12]\d|3[01])$/.test(value)) return false
-  return /^([./-])(?:0?[1-9]|1[0-2])\1\d{2}(?:\d{2})?\b/.test(following) ||
-    /^(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b\.?(?:[ \t,]+\d{2}(?:\d{2})?\b|[ \t]*(?:\n|$))/i.test(following)
+  if (/^([./-])(?:0?[1-9]|1[0-2])\1\d{2}(?:\d{2})?\b/.test(following)) return true
+  const month = MONTH_NAME.exec(following)
+  return !!month && /^(?:[ \t,]+\d{2}(?:\d{2})?\b|[ \t]*(?:\n|$))/.test(following.slice(month[0].length))
 }
 
 function taxInvoiceEvidence(text: string, heading: string): boolean {
