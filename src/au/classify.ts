@@ -31,7 +31,7 @@ export type AuOptions = {
   modelPolicy?: 'compare' | 'uncertain'
 }
 
-type Rule = { type: AuDocumentType; heading: RegExp; support: RegExp | ((text: string) => boolean) }
+type Rule = { type: AuDocumentType; heading: RegExp; support: RegExp | ((text: string, heading: string) => boolean) }
 
 function orderedTokens(text: string, tokens: RegExp, pairs: [string, string][]): boolean {
   const seen = new Set<string>()
@@ -42,9 +42,85 @@ function orderedTokens(text: string, tokens: RegExp, pairs: [string, string][]):
   }
   return false
 }
+
+function employmentIncomeEvidence(text: string, heading: string): boolean {
+  if (/\btax[\s-]+ready\b|\bsingle\s+touch\s+payroll\b|\bgross\s+payments\b/i.test(text)) return true
+  if (!/\b(?:salary|gross\s+amount)\b/i.test(text)) return false
+  if (/\bemployment\s+income statement\b/i.test(heading) ||
+      /\b(?:ATO\s+online\s+services|tax\s+withheld|PAYG\s+withholding|employer\s+(?:name|ABN))\b/i.test(text)) return true
+  const fields = /(?:\bemployer[ \t]*:|^[ \t]*employer[ \t]*$)\s*(\S[^\n]*)/gim
+  const payrollField = /^(?:salary(?:(?:\s+and\s+|\s*&\s*)wages)?|gross\s+amount)\b(?:\s*\([^()\n]*\))?\s*(?::|(?:AUD\s*)?(?:A?\$\s*)?[-+(]?\d|$)/i
+  for (const [, value] of text.matchAll(fields)) {
+    // A payroll amount on the following line can belong to a blank Employer field.
+    if (/\p{L}/u.test(value.replace(/(?<!\p{L})AUD(?!\p{L})|A\$/giu, '')) && !payrollField.test(value)) return true
+  }
+  return false
+}
+
+// Non-adjacent Unicode paired brackets after the page's NFKC normalisation.
+const FIELD_CLOSERS: Record<string, string> = { '[': ']', '{': '}', '\u298d': '\u2990', '\u298f': '\u298e' }
+// The Unicode 18 pair U+2E62/U+2E63 also occurs on Node versions with older Unicode tables.
+const FIELD_OPEN = /(?=\p{Bidi_Mirrored})\p{Ps}|\u2e62/u
+const MONTH_NAME = /^(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b\.?/i
+
+function isTimeQuantityField(suffix: string): boolean {
+  const value = /(?:^|[:=][ \t]*|[ \t])[-+]?\d+(?:[.,]\d+)?[ \t]*$/.exec(suffix)
+  if (!value) return false
+  const label = suffix.slice(0, value.index).trimEnd()
+  if (/^(?:from|after|before|following|of|to|until|within|net|starting|ending|beginning|commencing)\b/i.test(label)) return false
+  const annotation = label.replace(/^[\p{L}\p{M}\p{Pd}'’/& \t]*/u, '')
+  if (/^[ \t]/.test(value[0])) {
+    // A table cell can have one descriptor and a separate annotation before its numeric value.
+    const descriptor = label.slice(0, label.length - annotation.length).trimEnd()
+    if (/[ \t/&]/.test(descriptor) || MONTH_NAME.test(descriptor)) return false
+  }
+  if (!annotation) return true
+  if (!FIELD_OPEN.test(annotation.charAt(0))) return false
+  const closing: string[] = []
+  for (const mark of annotation.matchAll(/(?=\p{Bidi_Mirrored})[\p{Ps}\p{Pe}]|[\u2e62\u2e63]/gu)) {
+    if (FIELD_OPEN.test(mark[0])) {
+      closing.push(FIELD_CLOSERS[mark[0]] ?? String.fromCodePoint(mark[0].codePointAt(0)! + 1))
+      continue
+    }
+    const expected = closing.pop()
+    if (mark[0] !== expected) return false
+    // A second clause after the annotation belongs to the text of a payment term.
+    if (!closing.length) return mark.index + mark[0].length === annotation.length
+  }
+  return false
+}
+
+function continuesDate(value: string, following: string): boolean {
+  if (/^\d{4}$/.test(value)) return /^([./-])(?:0?[1-9]|1[0-2])\1(?:0?[1-9]|[12]\d|3[01])\b/.test(following)
+  if (/^(?:0?[1-9]|[12]\d|3[01])\.(?:0?[1-9]|1[0-2])$/.test(value)) return /^\.\d{2}(?:\d{2})?\b/.test(following)
+  if (!/^(?:0?[1-9]|[12]\d|3[01])$/.test(value)) return false
+  if (/^([./-])(?:0?[1-9]|1[0-2])\1\d{2}(?:\d{2})?\b/.test(following)) return true
+  const month = MONTH_NAME.exec(following)
+  return !!month && /^(?:[ \t,]+\d{2}(?:\d{2})?\b|[ \t]*(?:\n|$))/.test(following.slice(month[0].length))
+}
+
+function taxInvoiceEvidence(text: string, heading: string): boolean {
+  if (/\bthis(?:\s+(?:document|notice|receipt))?\s+is(?:\s+not|n['’]t)\s+(?:a\s+)?tax invoice\b/i.test(heading) ||
+      !/\btax invoice\b/i.test(heading.replace(/\b(?:not|isn['’]t)\s+(?:(?:a|the)\s+)?tax invoice\b/gi, ''))) return false
+  if (orderedTokens(text, /\b(?:GST|total|balance)\b/gi, [['gst', 'total'], ['gst', 'balance'], ['total', 'gst']])) return true
+  if (!/\bGST\b/i.test(text)) return false
+  const amounts = /\bamount\s+(?:due|payable)\b[\s:]*(?:\(AUD\)[\s:]*|AUD[ \t]*)?(?:A?\$[ \t]*)?(\d+(?:,\d{3})*(?:\.\d{1,2})?)(?:[ \t]+AUD)?(?:[ \t]+(?:incl?\.?|including|inclusive[ \t]+of)[ \t]+GST)?[ \t]*$/gim
+  for (const amount of text.matchAll(amounts)) {
+    if (/AUD|GST|\$/i.test(amount[0])) return true
+    // OCR can wrap a duration onto the next line. A labelled row starts its own field.
+    const following = text.slice(amount.index + amount[0].length).trimStart()
+    if (continuesDate(amount[1], following)) continue
+    const unit = /^(?:(?:business|working|calendar)\s+)?(?:days?|weeks?|months?|hours?|minutes?|years?)\b/i.exec(following)
+    if (!unit) return true
+    const suffix = following.slice(unit[0].length).split('\n', 1)[0].trimStart()
+    if (isTimeQuantityField(suffix)) return true
+  }
+  return false
+}
+
 // Rule matches are evidence, never calibrated probabilities or filing approvals.
 const RULES: Rule[] = [
-  { type: 'income-statement', heading: /\bincome statement\b/i, support: /tax ready|salary|gross (?:payments|amount)|single touch payroll/i },
+  { type: 'income-statement', heading: /\bincome statement\b/i, support: employmentIncomeEvidence },
   { type: 'payment-summary', heading: /\bpayment summary\b/i, support: /PAYG|pay as you go|withheld|gross payments/i },
   { type: 'bank-statement', heading: /\b(bank statement|statement of account|(?:savings|transaction|bank) account statement)\b/i, support: /opening balance|closing balance|interest credited|withdrawals|deposits/i },
   { type: 'loan-statement', heading: /\b(?:(?:home )?loan|mortgage)(?: account)? statement\b/i, support: /interest|principal|repayment/i },
@@ -57,8 +133,7 @@ const RULES: Rule[] = [
     support: text => orderedTokens(text, /\b(?:G1|1A|1B)\b/gi, [['g1', '1a'], ['1a', '1b']]) },
   { type: 'notice-of-assessment', heading: /\bnotice of (?:amended )?assessment\b/i, support: /taxable income|refund|amount payable|balance of this assessment/i },
   { type: 'tax-return', heading: /\b(?:(?:individual|company|trust|partnership|superannuation fund|fund income) tax return|self-managed superannuation fund annual return)\b/i, support: /income|deductions|declaration|distribution/i },
-  { type: 'tax-invoice', heading: /\btax invoice\b/i,
-    support: text => orderedTokens(text, /\b(?:GST|total|balance)\b/gi, [['gst', 'total'], ['gst', 'balance'], ['total', 'gst']]) },
+  { type: 'tax-invoice', heading: /\btax invoice\b/i, support: taxInvoiceEvidence },
   // A receipt needs affirmative payment evidence; "not paid" contains "paid" and must not count.
   { type: 'receipt', heading: /\b(?:payment |sales )?receipt\b/i,
     support: text => !/\b(?:not|never)\s+(?:paid|yet\s+paid|been\s+paid|yet\s+been\s+paid)\b|\bpayment\s+(?:not|never)\s+(?:received|yet\s+received)\b|\bunpaid\b|\bawaiting payment\b/i.test(text) &&
@@ -119,7 +194,7 @@ export function classifyAuRules(page: AuPage): AuResult {
     if (!rule.heading.test(heading)) return false
     // A repeated title is not independent support for that document category.
     const evidence = text.replace(new RegExp(rule.heading.source, 'gi'), ' ')
-    return typeof rule.support === 'function' ? rule.support(evidence) : rule.support.test(evidence)
+    return typeof rule.support === 'function' ? rule.support(evidence, heading) : rule.support.test(evidence)
   })
   r.candidates = matches.map(m => m.type)
   // Evidence contains rule identifiers, not names, account numbers or document text.
