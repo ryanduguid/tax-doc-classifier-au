@@ -52,7 +52,7 @@ function employmentIncomeEvidence(text: string, heading: string): boolean {
   const payrollField = /^(?:salary(?:(?:\s+and\s+|\s*&\s*)wages)?|gross\s+amount)\b(?:\s*\([^()\n]*\))?\s*(?::|(?:AUD\s*)?(?:A?\$\s*)?[-+(]?\d|$)/i
   for (const [, value] of text.matchAll(fields)) {
     // A payroll amount on the following line can belong to a blank Employer field.
-    if (/[\p{L}\p{N}]/u.test(value) && !payrollField.test(value)) return true
+    if (/\p{L}/u.test(value.replace(/\bAUD\b|A\$/gi, '')) && !payrollField.test(value)) return true
   }
   return false
 }
@@ -60,37 +60,54 @@ function employmentIncomeEvidence(text: string, heading: string): boolean {
 // Non-adjacent Unicode paired brackets after the page's NFKC normalisation.
 const FIELD_CLOSERS: Record<string, string> = { '[': ']', '{': '}', '\u298d': '\u2990', '\u298f': '\u298e' }
 // The Unicode 18 pair U+2E62/U+2E63 also occurs on Node versions with older Unicode tables.
-const FIELD_OPEN = /[\p{Ps}\u2e62]/u
+const FIELD_OPEN = /(?=\p{Bidi_Mirrored})\p{Ps}|\u2e62/u
 
-function hasAnnotatedNumber(suffix: string): boolean {
-  if (!FIELD_OPEN.test(suffix.charAt(0))) return false
+function isTimeQuantityField(suffix: string): boolean {
+  // Without a delimiter only a bare quantity or a conventional time label identifies a numeric cell.
+  const value = /(?:^|[:=][ \t]*|^(?:worked|billed|charged|logged|spent|outstanding)[ \t]+)[-+]?\d+(?:[.,]\d+)?[ \t]*$/i.exec(suffix)
+  if (!value) return false
+  const label = suffix.slice(0, value.index).trimEnd()
+  if (/^(?:from|after|before|following|of|to|until|within|net)\b/i.test(label)) return false
+  const annotation = label.replace(/^[\p{L}\p{M}\p{Pd}'’/& \t]*/u, '')
+  if (!annotation) return true
+  if (!FIELD_OPEN.test(annotation.charAt(0))) return false
   const closing: string[] = []
-  for (const mark of suffix.matchAll(/[\p{Ps}\p{Pe}\u2e62\u2e63]/gu)) {
+  for (const mark of annotation.matchAll(/(?=\p{Bidi_Mirrored})[\p{Ps}\p{Pe}]|[\u2e62\u2e63]/gu)) {
     if (FIELD_OPEN.test(mark[0])) {
       closing.push(FIELD_CLOSERS[mark[0]] ?? String.fromCodePoint(mark[0].codePointAt(0)! + 1))
       continue
     }
     const expected = closing.pop()
     if (mark[0] !== expected) return false
-    // Only a value immediately after the first complete annotation belongs to this field.
-    if (!closing.length) return /^[ \t]*[:=][ \t]*[-+]?\d+(?:[.,]\d+)?[ \t]*$/.test(suffix.slice(mark.index + mark[0].length))
+    // A second clause after the annotation belongs to the text of a payment term.
+    if (!closing.length) return mark.index + mark[0].length === annotation.length
   }
   return false
 }
 
-function taxInvoiceEvidence(text: string): boolean {
+function continuesDate(value: string, following: string): boolean {
+  if (/^\d{4}$/.test(value)) return /^([./-])(?:0?[1-9]|1[0-2])\1(?:0?[1-9]|[12]\d|3[01])\b/.test(following)
+  if (/^(?:0?[1-9]|[12]\d|3[01])\.(?:0?[1-9]|1[0-2])$/.test(value)) return /^\.\d{2}(?:\d{2})?\b/.test(following)
+  if (!/^(?:0?[1-9]|[12]\d|3[01])$/.test(value)) return false
+  return /^([./-])(?:0?[1-9]|1[0-2])\1\d{2}(?:\d{2})?\b/.test(following) ||
+    /^(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b\.?(?:[ \t,]+\d{2}(?:\d{2})?\b|[ \t]*(?:\n|$))/i.test(following)
+}
+
+function taxInvoiceEvidence(text: string, heading: string): boolean {
+  if (/\bthis(?:\s+(?:document|notice|receipt))?\s+is(?:\s+not|n['’]t)\s+(?:a\s+)?tax invoice\b/i.test(heading) ||
+      !/\btax invoice\b/i.test(heading.replace(/\b(?:not|isn['’]t)\s+(?:(?:a|the)\s+)?tax invoice\b/gi, ''))) return false
   if (orderedTokens(text, /\b(?:GST|total|balance)\b/gi, [['gst', 'total'], ['gst', 'balance'], ['total', 'gst']])) return true
   if (!/\bGST\b/i.test(text)) return false
-  const amounts = /\bamount\s+(?:due|payable)\b[\s:]*((?:AUD[ \t]*)?(?:A?\$[ \t]*)?\d+(?:,\d{3})*(?:\.\d{1,2})?(?:[ \t]+AUD)?)[ \t]*$/gim
+  const amounts = /\bamount\s+(?:due|payable)\b[\s:]*(?:\(AUD\)[\s:]*|AUD[ \t]*)?(?:A?\$[ \t]*)?(\d+(?:,\d{3})*(?:\.\d{1,2})?)(?:[ \t]+AUD)?(?:[ \t]+(?:incl?\.?|including|inclusive[ \t]+of)[ \t]+GST)?[ \t]*$/gim
   for (const amount of text.matchAll(amounts)) {
-    if (/AUD|\$/i.test(amount[1])) return true
+    if (/AUD|GST|\$/i.test(amount[0])) return true
     // OCR can wrap a duration onto the next line. A labelled row starts its own field.
     const following = text.slice(amount.index + amount[0].length).trimStart()
+    if (continuesDate(amount[1], following)) continue
     const unit = /^(?:(?:business|working|calendar)\s+)?(?:days?|weeks?|months?|hours?|minutes?|years?)\b/i.exec(following)
     if (!unit) return true
     const suffix = following.slice(unit[0].length).split('\n', 1)[0].trimStart()
-    if (hasAnnotatedNumber(suffix)) return true
-    if (/[:=\d]/.test(suffix) && !/^[\s\p{Ps}\u2e62]*(?:from|after|before|following|of|to|until|within|net)\b/iu.test(suffix)) return true
+    if (isTimeQuantityField(suffix)) return true
   }
   return false
 }
