@@ -52,7 +52,7 @@ function employmentIncomeEvidence(text: string, heading: string): boolean {
   const payrollField = /^(?:salary(?:(?:\s+and\s+|\s*&\s*)wages)?|gross\s+amount)\b(?:\s*\([^()\n]*\))?\s*(?::|(?:AUD\s*)?(?:A?\$\s*)?[-+(]?\d|$)/i
   for (const [, value] of text.matchAll(fields)) {
     // A payroll amount on the following line can belong to a blank Employer field.
-    if (/\p{L}/u.test(value.replace(/\bAUD\b|A\$/gi, '')) && !payrollField.test(value)) return true
+    if (/\p{L}/u.test(value.replace(/(?<!\p{L})AUD(?!\p{L})|A\$/giu, '')) && !payrollField.test(value)) return true
   }
   return false
 }
@@ -68,9 +68,12 @@ function isTimeQuantityField(suffix: string): boolean {
   if (!value) return false
   const label = suffix.slice(0, value.index).trimEnd()
   if (/^(?:from|after|before|following|of|to|until|within|net|starting|ending|beginning|commencing)\b/i.test(label)) return false
-  // A single descriptor can identify an unpunctuated table cell such as "Hours payable 2".
-  if (/^[ \t]/.test(value[0]) && (!/^[\p{L}\p{M}\p{Pd}'’]+$/u.test(label) || MONTH_NAME.test(label))) return false
   const annotation = label.replace(/^[\p{L}\p{M}\p{Pd}'’/& \t]*/u, '')
+  if (/^[ \t]/.test(value[0])) {
+    // A table cell can have one descriptor and a separate annotation before its numeric value.
+    const descriptor = label.slice(0, label.length - annotation.length).trimEnd()
+    if (/[ \t/&]/.test(descriptor) || MONTH_NAME.test(descriptor)) return false
+  }
   if (!annotation) return true
   if (!FIELD_OPEN.test(annotation.charAt(0))) return false
   const closing: string[] = []
