@@ -57,6 +57,27 @@ function employmentIncomeEvidence(text: string, heading: string): boolean {
   return false
 }
 
+// Non-adjacent Unicode paired brackets after the page's NFKC normalisation.
+const FIELD_CLOSERS: Record<string, string> = { '[': ']', '{': '}', '\u298d': '\u2990', '\u298f': '\u298e' }
+// The Unicode 18 pair U+2E62/U+2E63 also occurs on Node versions with older Unicode tables.
+const FIELD_OPEN = /[\p{Ps}\u2e62]/u
+
+function hasAnnotatedNumber(suffix: string): boolean {
+  if (!FIELD_OPEN.test(suffix.charAt(0))) return false
+  const closing: string[] = []
+  for (const mark of suffix.matchAll(/[\p{Ps}\p{Pe}\u2e62\u2e63]/gu)) {
+    if (FIELD_OPEN.test(mark[0])) {
+      closing.push(FIELD_CLOSERS[mark[0]] ?? String.fromCodePoint(mark[0].codePointAt(0)! + 1))
+      continue
+    }
+    const expected = closing.pop()
+    if (mark[0] !== expected) return false
+    // Only a value immediately after the first complete annotation belongs to this field.
+    if (!closing.length) return /^[ \t]*[:=][ \t]*[-+]?\d+(?:[.,]\d+)?[ \t]*$/.test(suffix.slice(mark.index + mark[0].length))
+  }
+  return false
+}
+
 function taxInvoiceEvidence(text: string): boolean {
   if (orderedTokens(text, /\b(?:GST|total|balance)\b/gi, [['gst', 'total'], ['gst', 'balance'], ['total', 'gst']])) return true
   if (!/\bGST\b/i.test(text)) return false
@@ -68,8 +89,8 @@ function taxInvoiceEvidence(text: string): boolean {
     const unit = /^(?:(?:business|working|calendar)\s+)?(?:days?|weeks?|months?|hours?|minutes?|years?)\b/i.exec(following)
     if (!unit) return true
     const suffix = following.slice(unit[0].length).split('\n', 1)[0].trimStart()
-    if (/^\p{Ps}.*\p{Pe}[ \t]*[:=][ \t]*[-+]?\d+(?:[.,]\d+)?[ \t]*$/u.test(suffix)) return true
-    if (/[:=\d]/.test(suffix) && !/^[\s\p{Ps}]*(?:from|after|before|following|of|to|until|within|net)\b/iu.test(suffix)) return true
+    if (hasAnnotatedNumber(suffix)) return true
+    if (/[:=\d]/.test(suffix) && !/^[\s\p{Ps}\u2e62]*(?:from|after|before|following|of|to|until|within|net)\b/iu.test(suffix)) return true
   }
   return false
 }
