@@ -44,7 +44,9 @@ function orderedTokens(text: string, tokens: RegExp, pairs: [string, string][]):
 }
 // Rule matches are evidence, never calibrated probabilities or filing approvals.
 const RULES: Rule[] = [
-  { type: 'income-statement', heading: /\bincome statement\b/i, support: /tax ready|salary|gross (?:payments|amount)|single touch payroll/i },
+  { type: 'income-statement', heading: /\bincome statement\b/i,
+    support: text => /\btax[ -]ready\b|\bsingle touch payroll\b|\bgross payments\b/i.test(text) ||
+      (/\b(?:salary|gross amount)\b/i.test(text) && /\b(?:ATO online services|tax withheld|PAYG withholding|employer (?:name|ABN))\b/i.test(text)) },
   { type: 'payment-summary', heading: /\bpayment summary\b/i, support: /PAYG|pay as you go|withheld|gross payments/i },
   { type: 'bank-statement', heading: /\b(bank statement|statement of account|(?:savings|transaction|bank) account statement)\b/i, support: /opening balance|closing balance|interest credited|withdrawals|deposits/i },
   { type: 'loan-statement', heading: /\b(?:(?:home )?loan|mortgage)(?: account)? statement\b/i, support: /interest|principal|repayment/i },
@@ -58,7 +60,8 @@ const RULES: Rule[] = [
   { type: 'notice-of-assessment', heading: /\bnotice of (?:amended )?assessment\b/i, support: /taxable income|refund|amount payable|balance of this assessment/i },
   { type: 'tax-return', heading: /\b(?:(?:individual|company|trust|partnership|superannuation fund|fund income) tax return|self-managed superannuation fund annual return)\b/i, support: /income|deductions|declaration|distribution/i },
   { type: 'tax-invoice', heading: /\btax invoice\b/i,
-    support: text => orderedTokens(text, /\b(?:GST|total|balance)\b/gi, [['gst', 'total'], ['gst', 'balance'], ['total', 'gst']]) },
+    support: text => orderedTokens(text, /\b(?:GST|total|balance)\b/gi, [['gst', 'total'], ['gst', 'balance'], ['total', 'gst']]) ||
+      (/\bGST\b/i.test(text) && /\bamount\s+(?:due|payable)\b/i.test(text)) },
   // A receipt needs affirmative payment evidence; "not paid" contains "paid" and must not count.
   { type: 'receipt', heading: /\b(?:payment |sales )?receipt\b/i,
     support: text => !/\b(?:not|never)\s+(?:paid|yet\s+paid|been\s+paid|yet\s+been\s+paid)\b|\bpayment\s+(?:not|never)\s+(?:received|yet\s+received)\b|\bunpaid\b|\bawaiting payment\b/i.test(text) &&

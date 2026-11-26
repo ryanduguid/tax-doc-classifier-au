@@ -177,4 +177,16 @@ describe('Australian document headings', () => {
     const page: AuPage = { page: 1, text: 'Income Statement\nRevenue 500000\nCost of sales 200000\nGross profit 300000', extraction: 'native' }
     expect(classifyAuRules(page).documentType).toBe('unknown')
   })
+
+  it.each([
+    ['Income Statement\nRevenue 500000\nSalary and wages 80000\nGross profit 300000', 'unknown'],
+    ['Income Statement\nGross amount 500000\nOperating expenses 200000', 'unknown'],
+    ['Income statement\nEmployer ABN\nSalary and wages 80000', 'income-statement'],
+    ['Tax invoice\nGST 10.00\nAmount due 110.00', 'tax-invoice'],
+    ['Tax invoice\nAmount payable 110.00\nGST 10.00', 'tax-invoice'],
+    ['Tax invoice\nAmount due 110.00', 'unknown'],
+    ['Quote\nGST 10.00\nAmount due 110.00', 'unknown'],
+  ])('applies heading and supporting evidence to %s', (text, expected) => {
+    expect(classifyAuRules({ page: 1, text, extraction: 'native' }).documentType).toBe(expected)
+  })
 })
