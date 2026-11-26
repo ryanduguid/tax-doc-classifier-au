@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { jevBackend, layaBackend, type ChoiceQuestion } from './backend.js'
+import { classifyAuPage } from './au/classify.js'
 
 const question: Record<string, ChoiceQuestion> = { document: { type: 'choice', instructions: 'Classify.', criteria: {
   'tax-invoice': { what: 'Tax invoice.', not_for: 'Quotes.' }, unknown: { what: 'Anything else.', examples: ['letter'] } } } }
@@ -51,6 +52,13 @@ describe('Laya backend', () => {
   it('passes malformed answers through for the caller to reject', async () => {
     fetchMock.mockResolvedValueOnce(reply(200, { answers: { document: 'bad' } }))
     expect(await layaBackend().ask('text', question)).toEqual({ answers: { document: 'bad' }, inputTokens: 0, truncated: false })
+  })
+  it('reports a successful null reply as an invalid model response', async () => {
+    fetchMock.mockResolvedValueOnce(reply(200, null))
+    const page = { page: 1, text: 'An ordinary letter.', extraction: 'native' as const, warnings: [] }
+    const result = await classifyAuPage(page, { backend: layaBackend(), allowModelProcessing: true })
+    expect(result).toMatchObject({ documentType: 'unknown', reason: 'invalid_model_response', requiresReview: true, calls: 1 })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
   it('flags a page the server cut to its context limit', async () => {
     fetchMock.mockResolvedValueOnce(reply(200, { ...layaReply, usage: { input_tokens: 1024, output_tokens: 0 } }))

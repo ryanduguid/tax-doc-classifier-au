@@ -72,7 +72,7 @@ function systemOneBackend(p: Provider): Backend {
           continue
         }
         if (res.ok) {
-          const json = JSON.parse(text) as { answers?: Record<string, unknown>; usage?: { input_tokens?: number } }
+          const json = (JSON.parse(text) ?? {}) as { answers?: Record<string, unknown>; usage?: { input_tokens?: number } }
           const answers = Object.fromEntries(Object.entries(json.answers ?? {}).map(([key, a]) => [key, p.answer(a)]))
           const inputTokens = json.usage?.input_tokens ?? 0
           return { answers: answers as Record<string, ChoiceAnswer>, inputTokens, ...(p.limit && { truncated: inputTokens >= p.limit }) }
