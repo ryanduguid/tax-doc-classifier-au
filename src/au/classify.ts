@@ -46,20 +46,29 @@ function orderedTokens(text: string, tokens: RegExp, pairs: [string, string][]):
 function employmentIncomeEvidence(text: string, heading: string): boolean {
   if (/\btax[\s-]+ready\b|\bsingle\s+touch\s+payroll\b|\bgross\s+payments\b/i.test(text)) return true
   if (!/\b(?:salary|gross\s+amount)\b/i.test(text)) return false
-  return /\bemployment\s+income statement\b/i.test(heading) ||
-    /\b(?:ATO\s+online\s+services|tax\s+withheld|PAYG\s+withholding|employer\s+(?:name|ABN))\b/i.test(text) ||
-    /(?:\bemployer[ \t]*:[ \t]*(?:\n[ \t]*)?|^[ \t]*employer[ \t]*\n[ \t]*)(?!salary\b|gross\s+amount\b)[\p{L}\p{N}]/imu.test(text)
+  if (/\bemployment\s+income statement\b/i.test(heading) ||
+      /\b(?:ATO\s+online\s+services|tax\s+withheld|PAYG\s+withholding|employer\s+(?:name|ABN))\b/i.test(text)) return true
+  const fields = /(?:\bemployer[ \t]*:|^[ \t]*employer[ \t]*$)\s*(\S[^\n]*)/gim
+  const payrollField = /^(?:salary(?:\s+and\s+wages)?|gross\s+amount)\b(?:\s*\([^()\n]*\))?\s*(?::|(?:AUD\s*)?(?:A?\$\s*)?[-+(]?\d|$)/i
+  for (const [, value] of text.matchAll(fields)) {
+    // A payroll amount on the following line can belong to a blank Employer field.
+    if (/[\p{L}\p{N}]/u.test(value) && !payrollField.test(value)) return true
+  }
+  return false
 }
 
 function taxInvoiceEvidence(text: string): boolean {
   if (orderedTokens(text, /\b(?:GST|total|balance)\b/gi, [['gst', 'total'], ['gst', 'balance'], ['total', 'gst']])) return true
   if (!/\bGST\b/i.test(text)) return false
-  const amounts = /\bamount\s+(?:due|payable)\b[ \t]*:?[ \t]*(?:\n[ \t]*)?((?:AUD[ \t]*)?(?:A?\$[ \t]*)?\d+(?:,\d{3})*(?:\.\d{1,2})?(?:[ \t]+AUD)?)[ \t]*$/gim
+  const amounts = /\bamount\s+(?:due|payable)\b[\s:]*((?:AUD[ \t]*)?(?:A?\$[ \t]*)?\d+(?:,\d{3})*(?:\.\d{1,2})?(?:[ \t]+AUD)?)[ \t]*$/gim
   for (const amount of text.matchAll(amounts)) {
     if (/AUD|\$/i.test(amount[1])) return true
-    // An unmarked number can carry its duration unit on the next line. 'Hours: 2' starts a separate field.
-    const next = text.slice(amount.index + amount[0].length).trimStart()
-    if (!/^(?:(?:business|working|calendar)\s+)?(?:days?|weeks?|months?|hours?|minutes?|years?)\b(?![ \t]*(?:[:=]|\d))/i.test(next)) return true
+    // OCR can wrap a duration onto the next line. A labelled row starts its own field.
+    const nextLine = text.slice(amount.index + amount[0].length).trimStart().split('\n', 1)[0]
+    const unit = /^(?:(?:business|working|calendar)\s+)?(?:days?|weeks?|months?|hours?|minutes?|years?)\b/i.exec(nextLine)
+    if (!unit) return true
+    const suffix = nextLine.slice(unit[0].length).trimStart()
+    if (/[:=\d]/.test(suffix) && !/^(?:from|after|before|following|of|to|until|within|net)\b/i.test(suffix)) return true
   }
   return false
 }
