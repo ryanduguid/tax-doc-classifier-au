@@ -48,20 +48,18 @@ function employmentIncomeEvidence(text: string, heading: string): boolean {
   if (!/\b(?:salary|gross\s+amount)\b/i.test(text)) return false
   return /\bemployment\s+income statement\b/i.test(heading) ||
     /\b(?:ATO\s+online\s+services|tax\s+withheld|PAYG\s+withholding|employer\s+(?:name|ABN))\b/i.test(text) ||
-    /^[ \t]*employer[ \t]*(?::[ \t]*|\n[ \t]*)\S/im.test(text)
+    /(?:\bemployer[ \t]*:[ \t]*(?:\n[ \t]*)?|^[ \t]*employer[ \t]*\n[ \t]*)(?!salary\b|gross\s+amount\b)[\p{L}\p{N}]/imu.test(text)
 }
 
 function taxInvoiceEvidence(text: string): boolean {
   if (orderedTokens(text, /\b(?:GST|total|balance)\b/gi, [['gst', 'total'], ['gst', 'balance'], ['total', 'gst']])) return true
   if (!/\bGST\b/i.test(text)) return false
-  for (const label of text.matchAll(/\bamount\s+(?:due|payable)\b/gi)) {
-    const following = text.slice(label.index + label[0].length)
-    const amount = /^[\s:]*((?:AUD[ \t]*)?(?:A?\$[ \t]*)?\d+(?:,\d{3})*(?:\.\d{1,2})?(?:[ \t]+AUD)?)[ \t]*(?=\n|$)/i.exec(following)
-    if (!amount) continue
-    // A bare integer can be the first line of a payment term such as '30\nbusiness days'.
-    const continuation = following.slice(amount[0].length)
-    if (/^[\d,]+$/.test(amount[1]) && /^\s*(?:(?:business|working|calendar)\s+)?(?:days?|weeks?|months?|hours?)\b/i.test(continuation)) continue
-    return true
+  const amounts = /\bamount\s+(?:due|payable)\b[ \t]*:?[ \t]*(?:\n[ \t]*)?((?:AUD[ \t]*)?(?:A?\$[ \t]*)?\d+(?:,\d{3})*(?:\.\d{1,2})?(?:[ \t]+AUD)?)[ \t]*$/gim
+  for (const amount of text.matchAll(amounts)) {
+    if (/AUD|\$/i.test(amount[1])) return true
+    // An unmarked number can carry its duration unit on the next line. 'Hours: 2' starts a separate field.
+    const next = text.slice(amount.index + amount[0].length).trimStart()
+    if (!/^(?:(?:business|working|calendar)\s+)?(?:days?|weeks?|months?|hours?|minutes?|years?)\b(?![ \t]*(?:[:=]|\d))/i.test(next)) return true
   }
   return false
 }
