@@ -31,7 +31,7 @@ export type AuOptions = {
   modelPolicy?: 'compare' | 'uncertain'
 }
 
-type Rule = { type: AuDocumentType; heading: RegExp; support: RegExp | ((text: string) => boolean) }
+type Rule = { type: AuDocumentType; heading: RegExp; support: RegExp | ((text: string, heading: string) => boolean) }
 
 function orderedTokens(text: string, tokens: RegExp, pairs: [string, string][]): boolean {
   const seen = new Set<string>()
@@ -42,11 +42,17 @@ function orderedTokens(text: string, tokens: RegExp, pairs: [string, string][]):
   }
   return false
 }
+
+function employmentIncomeEvidence(text: string, heading: string): boolean {
+  if (/\btax[\s-]+ready\b|\bsingle\s+touch\s+payroll\b|\bgross\s+payments\b/i.test(text)) return true
+  if (!/\b(?:salary|gross\s+amount)\b/i.test(text)) return false
+  return /\bemployment\s+income statement\b/i.test(heading) ||
+    /\b(?:ATO\s+online\s+services|tax\s+withheld|PAYG\s+withholding|employer\s+(?:name|ABN))\b|\bemployer\s*:/i.test(text)
+}
+
 // Rule matches are evidence, never calibrated probabilities or filing approvals.
 const RULES: Rule[] = [
-  { type: 'income-statement', heading: /\bincome statement\b/i,
-    support: text => /\btax[ -]ready\b|\bsingle touch payroll\b|\bgross payments\b/i.test(text) ||
-      (/\b(?:salary|gross amount)\b/i.test(text) && /\b(?:ATO online services|tax withheld|PAYG withholding|employer (?:name|ABN))\b/i.test(text)) },
+  { type: 'income-statement', heading: /\bincome statement\b/i, support: employmentIncomeEvidence },
   { type: 'payment-summary', heading: /\bpayment summary\b/i, support: /PAYG|pay as you go|withheld|gross payments/i },
   { type: 'bank-statement', heading: /\b(bank statement|statement of account|(?:savings|transaction|bank) account statement)\b/i, support: /opening balance|closing balance|interest credited|withdrawals|deposits/i },
   { type: 'loan-statement', heading: /\b(?:(?:home )?loan|mortgage)(?: account)? statement\b/i, support: /interest|principal|repayment/i },
@@ -61,7 +67,7 @@ const RULES: Rule[] = [
   { type: 'tax-return', heading: /\b(?:(?:individual|company|trust|partnership|superannuation fund|fund income) tax return|self-managed superannuation fund annual return)\b/i, support: /income|deductions|declaration|distribution/i },
   { type: 'tax-invoice', heading: /\btax invoice\b/i,
     support: text => orderedTokens(text, /\b(?:GST|total|balance)\b/gi, [['gst', 'total'], ['gst', 'balance'], ['total', 'gst']]) ||
-      (/\bGST\b/i.test(text) && /\bamount\s+(?:due|payable)\b/i.test(text)) },
+      (/\bGST\b/i.test(text) && /\bamount\s+(?:due|payable)\b[\s:]*(?:AUD[ \t]*)?(?:A?\$[ \t]*)?\d[\d,]*(?:\.\d{2})?[ \t]*$/im.test(text)) },
   // A receipt needs affirmative payment evidence; "not paid" contains "paid" and must not count.
   { type: 'receipt', heading: /\b(?:payment |sales )?receipt\b/i,
     support: text => !/\b(?:not|never)\s+(?:paid|yet\s+paid|been\s+paid|yet\s+been\s+paid)\b|\bpayment\s+(?:not|never)\s+(?:received|yet\s+received)\b|\bunpaid\b|\bawaiting payment\b/i.test(text) &&
@@ -122,7 +128,7 @@ export function classifyAuRules(page: AuPage): AuResult {
     if (!rule.heading.test(heading)) return false
     // A repeated title is not independent support for that document category.
     const evidence = text.replace(new RegExp(rule.heading.source, 'gi'), ' ')
-    return typeof rule.support === 'function' ? rule.support(evidence) : rule.support.test(evidence)
+    return typeof rule.support === 'function' ? rule.support(evidence, heading) : rule.support.test(evidence)
   })
   r.candidates = matches.map(m => m.type)
   // Evidence contains rule identifiers, not names, account numbers or document text.
