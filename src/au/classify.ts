@@ -49,7 +49,7 @@ function employmentIncomeEvidence(text: string, heading: string): boolean {
   if (/\bemployment\s+income statement\b/i.test(heading) ||
       /\b(?:ATO\s+online\s+services|tax\s+withheld|PAYG\s+withholding|employer\s+(?:name|ABN))\b/i.test(text)) return true
   const fields = /(?:\bemployer[ \t]*:|^[ \t]*employer[ \t]*$)\s*(\S[^\n]*)/gim
-  const payrollField = /^(?:salary(?:\s+and\s+wages)?|gross\s+amount)\b(?:\s*\([^()\n]*\))?\s*(?::|(?:AUD\s*)?(?:A?\$\s*)?[-+(]?\d|$)/i
+  const payrollField = /^(?:salary(?:(?:\s+and\s+|\s*&\s*)wages)?|gross\s+amount)\b(?:\s*\([^()\n]*\))?\s*(?::|(?:AUD\s*)?(?:A?\$\s*)?[-+(]?\d|$)/i
   for (const [, value] of text.matchAll(fields)) {
     // A payroll amount on the following line can belong to a blank Employer field.
     if (/[\p{L}\p{N}]/u.test(value) && !payrollField.test(value)) return true
@@ -64,11 +64,11 @@ function taxInvoiceEvidence(text: string): boolean {
   for (const amount of text.matchAll(amounts)) {
     if (/AUD|\$/i.test(amount[1])) return true
     // OCR can wrap a duration onto the next line. A labelled row starts its own field.
-    const nextLine = text.slice(amount.index + amount[0].length).trimStart().split('\n', 1)[0]
-    const unit = /^(?:(?:business|working|calendar)\s+)?(?:days?|weeks?|months?|hours?|minutes?|years?)\b/i.exec(nextLine)
+    const following = text.slice(amount.index + amount[0].length).trimStart()
+    const unit = /^(?:(?:business|working|calendar)\s+)?(?:days?|weeks?|months?|hours?|minutes?|years?)\b/i.exec(following)
     if (!unit) return true
-    const suffix = nextLine.slice(unit[0].length).trimStart()
-    if (/[:=\d]/.test(suffix) && !/^(?:from|after|before|following|of|to|until|within|net)\b/i.test(suffix)) return true
+    const suffix = following.slice(unit[0].length).split('\n', 1)[0].trimStart()
+    if (/[:=\d]/.test(suffix) && !/^[\s\p{Ps}]*(?:from|after|before|following|of|to|until|within|net)\b/iu.test(suffix)) return true
   }
   return false
 }
